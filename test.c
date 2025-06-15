@@ -1,11 +1,15 @@
 #include "raylib.h"
 #include "tdas/list.h"
 #include "tdas/extra.h"
+#include "tdas/grafo.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#define MAPA_ANCHO 10
-#define MAPA_ALTO 8
+#define MAPA_ANCHO 40
+#define MAPA_ALTO 10
+#define GRAVEDAD 0.9f
+#define VELOCIDAD_SALTO -10.0f
+#define VELOCIDAD_MAX_CAIDA 10.0f
 
 typedef enum GameScreen 
 {
@@ -19,58 +23,56 @@ typedef struct personaje
     int ataque;
     int defensa;
     int x;
-    int y;
+    float y;
+    float velocidad_Y; // Velocidad de movimiento
+    int enElSuelo; // Si está en el suelo o no
 } Personaje;
 
 const int base_ancho = 1280;
 const int base_alto = 900;
 
+NodoMapa* mapaActual = NULL; // Mapa donde estás actualmente
+int mapa[MAPA_ALTO][MAPA_ANCHO]; // Matriz del mapa cargado
+
+
 GameScreen pantallaDeJuego = MENU;
 int opcionSelecionada = 0;
-Personaje jugador = {.nombre = "",.vida = 100,.ataque = 10,.defensa = 5};
+Personaje jugador = {.nombre = "", .vida = 100, .ataque = 10, .defensa = 5, .velocidad_Y = 0, .enElSuelo = 0};
 
-int mapa[MAPA_ALTO][MAPA_ANCHO];
-
-void CargarMapa(int mapa[MAPA_ALTO][MAPA_ANCHO]) 
+void CargarMapa(const char* nombreArchivo, int mapa[MAPA_ALTO][MAPA_ANCHO]) 
 {
-    FILE *archivo = fopen("mapa.csv", "r");
-    if (archivo == NULL) 
-    {
-        printf("Error al abrir el archivo del mapa.\n");
+    FILE* archivo = fopen(nombreArchivo, "r");
+    if (!archivo) {
+        printf("No se pudo abrir el archivo %s\n", nombreArchivo);
         return;
     }
-    
-    for (int i = 0; i < MAPA_ALTO; i++) 
-    {
-        for (int j = 0; j < MAPA_ANCHO; j++) 
-        {
-            fscanf(archivo, "%d,", &mapa[i][j]);
-            if (mapa[i][j] == 9)
-            {
-                jugador.x = j; // Guardar la posición inicial del jugador
-                jugador.y = i;
+
+    for (int y = 0; y < MAPA_ALTO; y++) {
+        for (int x = 0; x < MAPA_ANCHO; x++) {
+            if (fscanf(archivo, "%d,", &mapa[y][x]) != 1) {
+                mapa[y][x] = 0; // valor por defecto si hay error
             }
         }
     }
     fclose(archivo);
 }
 
-void DibujarMapa(int mapa[MAPA_ALTO][MAPA_ANCHO], float scaleX, float scaleY) {
+void DibujarMapa(int mapa[MAPA_ALTO][MAPA_ANCHO], float scaleX, float scaleY)
+{
     for (int y = 0; y < MAPA_ALTO; y++) {
         for (int x = 0; x < MAPA_ANCHO; x++) {
             Rectangle tile = { x * 64 * scaleX, y * 64 * scaleY, 64 * scaleX, 64 * scaleY };
-            
             switch (mapa[y][x]) {
                 case 0: DrawRectangleRec(tile, BLACK); break;         // vacío
-                case 1: DrawRectangleRec(tile, GRAY); break;         // plataforma
-                case 2: DrawRectangleRec(tile, RED); break;          // enemigo
-                case 3: DrawRectangleRec(tile, BLUE); break;         // trampa eléctrica
-                case 4: DrawRectangleRec(tile, DARKGRAY); break;     // escombro
-                case 5: DrawRectangleRec(tile, ORANGE); break;       // compuerta
-                case 6: DrawRectangleRec(tile, GREEN); break;        // consola
-                case 7: DrawRectangleRec(tile, PURPLE); break;       // escalera
-                case 8: DrawRectangleRec(tile, GOLD); break;         // objeto
-                case 9: DrawRectangleRec(tile, WHITE); break;        // jugador inicio
+                case 1: DrawRectangleRec(tile, GRAY); break;          // plataforma
+                case 2: DrawRectangleRec(tile, RED); break;           // enemigo
+                case 3: DrawRectangleRec(tile, BLUE); break;          // trampa eléctrica
+                case 4: DrawRectangleRec(tile, DARKGRAY); break;      // escombro
+                case 5: DrawRectangleRec(tile, ORANGE); break;        // compuerta
+                case 6: DrawRectangleRec(tile, GREEN); break;         // consola
+                case 7: DrawRectangleRec(tile, PURPLE); break;        // escalera
+                case 8: DrawRectangleRec(tile, GOLD); break;          // objeto
+                default: DrawRectangleRec(tile, BLACK); break;        // por defecto
             }
         }
     }
@@ -112,24 +114,49 @@ void ActualizarPonerNombre() {
     }
 }
 
-void ActualizarGameplay() {
+void ActualizarGameplay() 
+{
+    float deltaTime = GetFrameTime();
+
+    // Movimiento horizontal
     int mover_x = jugador.x;
-    int mover_y = jugador.y;
     if (IsKeyDown(KEY_RIGHT)) mover_x++;
     if (IsKeyDown(KEY_LEFT)) mover_x--;
-    if (IsKeyDown(KEY_DOWN)) mover_y++;
-    if (IsKeyDown(KEY_UP)) mover_y--;
 
-    if (mover_x >= 0 && mover_x < MAPA_ANCHO && mover_y >= 0 && mover_y < MAPA_ALTO) 
-    {
-        if (mapa[mover_y][mover_x] != 1 && mapa[mover_y][mover_x] != 4 && mapa[mover_y][mover_x] != 5) { // solo se puede mover a espacios vacíos o plataformas
-            mapa[jugador.y][jugador.x] = 0; // limpiar la posición anterior
+    // Verificar colisión horizontal
+    if (mover_x >= 0 && mover_x < MAPA_ANCHO) {
+        if (mapa[(int)jugador.y][mover_x] == 0) { // Solo mover si está vacío
             jugador.x = mover_x;
-            jugador.y = mover_y;
-            mapa[jugador.y][jugador.x] = 9; // actualizar la posición del jugador
         }
     }
+
+    // Gravedad y salto
+    jugador.velocidad_Y += GRAVEDAD * deltaTime;
+    if (jugador.velocidad_Y > VELOCIDAD_MAX_CAIDA) {
+        jugador.velocidad_Y = VELOCIDAD_MAX_CAIDA;
+    }
+
+    float nuevaY = jugador.y + jugador.velocidad_Y * deltaTime;
+
+    // Colisión vertical
+    if (nuevaY >= 0 && nuevaY < MAPA_ALTO) {
+        if (mapa[(int)nuevaY][jugador.x] == 0) { // Si el nuevo espacio está vacío
+            jugador.y = nuevaY;
+        } else {
+            // Colisión con objeto sólido
+            jugador.velocidad_Y = 0;
+            jugador.enElSuelo = (jugador.velocidad_Y > 0); // Está en suelo si caía
+        }
+    }
+
+    // Salto
+    if (IsKeyPressed(KEY_UP) && jugador.enElSuelo) {
+        jugador.velocidad_Y = VELOCIDAD_SALTO;
+        jugador.enElSuelo = 0;
+    }
 }
+
+
 
 void DrawMenu(Texture2D menuTexture, float scaleX, float scaleY) {
     DrawTextureEx(menuTexture, (Vector2){0, 0}, 0.0f, scaleX, WHITE);
@@ -145,26 +172,62 @@ void DrawNameInput(float scaleX, float scaleY) {
     DrawText("Presiona ENTER para continuar", scaleX * 400, scaleY * 300, scaleY * 20, WHITE);
 }
 
-void DrawGameplay(float scaleX, float scaleY) {
-    DrawText("JUEGO INICIADO!", scaleX * 500, scaleY * 400, scaleY * 40, DARKGREEN);
-    DrawText(TextFormat("Jugador: %s", jugador.nombre), scaleX * 500, scaleY * 450, scaleY * 20, DARKGREEN);
-    DrawText("Presiona P para volver al menu", scaleX * 360, scaleY * 500, scaleY * 20, DARKGREEN);
-    DibujarMapa(mapa, scaleX, scaleY);
+void DrawGameplay(float scaleX, float scaleY) 
+{
+  DibujarMapa(mapa, scaleX, scaleY);
+    
+    // Dibuja al jugador
+    Rectangle playerRect = {
+        jugador.x * 64 * scaleX,
+        jugador.y * 64 * scaleY,
+        64 * scaleX,
+        64 * scaleY
+    };
+    
+    // Cuerpo del personaje
+    DrawRectangleRec(playerRect, SKYBLUE);
+    
+    // Cabeza (más pequeña)
+    Rectangle head = {
+        playerRect.x + playerRect.width * 0.25f,
+        playerRect.y,
+        playerRect.width * 0.5f,
+        playerRect.height * 0.5f
+    };
+    DrawRectangleRec(head, YELLOW);
+    
+    // Nombre
+    DrawText(jugador.nombre, 
+             playerRect.x + playerRect.width/2 - MeasureText(jugador.nombre, 20)/2, 
+             playerRect.y - 25, 
+             20, WHITE);
 }
-
 
 
 int main() {
     SetConfigFlags(FLAG_WINDOW_RESIZABLE);
     InitWindow(base_ancho, base_alto, "El inicio de una aventura");
-    SetTargetFPS(20);
+    SetTargetFPS(60);
 
     Image image = LoadImage("base/Menu_incial.png");
     ImageResize(&image, base_ancho, base_alto);
     Texture2D Menu_inicial_imagen = LoadTextureFromImage(image);
     UnloadImage(image);
 
-    CargarMapa(mapa);
+    NodoMapa* mapa1 = CrearMapa(1, "mapas/mapa1.csv");
+    NodoMapa* mapa2 = CrearMapa(2, "mapas/mapa2.csv");
+    NodoMapa* mapa3 = CrearMapa(3, "mapas/mapa3.csv");
+
+    ConectarMapas(mapa1, mapa2, 2); // mapa1 Este -> mapa2
+    ConectarMapas(mapa2, mapa1, 3); // mapa2 Oeste -> mapa1
+    ConectarMapas(mapa2, mapa3, 2); // mapa2 Este -> mapa3
+    ConectarMapas(mapa3, mapa2, 3); 
+
+    mapaActual = mapa1; // Comenzamos en el primer mapa
+    CargarMapa(mapaActual->archivoMapa, mapa);
+    jugador.x = 1; // Posición inicial del jugador
+    jugador.y = 1; // Posición inicial del jugador
+    mapa[(int)jugador.y][jugador.x] = 9; // Marca la posición del jugador en el mapa
 
     while (!WindowShouldClose()) {
         int pantalla_ancho = GetScreenWidth();
