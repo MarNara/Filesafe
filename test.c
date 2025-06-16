@@ -5,11 +5,12 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#define MAPA_ANCHO 40
-#define MAPA_ALTO 10
 #define GRAVEDAD 0.9f
 #define VELOCIDAD_SALTO -10.0f
 #define VELOCIDAD_MAX_CAIDA 10.0f
+#define VELOCIDAD_HORIZONTAL 5.0f // Velocidad en unidades de tile por segundo. Ajusta este valor.
+// Un valor de 5.0f significa que el personaje se moverá 5 tiles por segundo.
+// Si tus tiles son de 64x64 píxeles, esto es 5 * 64 = 320 píxeles por segundo.
 
 typedef enum GameScreen 
 {
@@ -22,9 +23,10 @@ typedef struct personaje
     int vida;
     int ataque;
     int defensa;
-    int x;
+    float x;
     float y;
     float velocidad_Y; // Velocidad de movimiento
+    float velocidad_X; // Velocidad de movimiento horizontal
     int enElSuelo; // Si está en el suelo o no
 } Personaje;
 
@@ -32,35 +34,54 @@ const int base_ancho = 1280;
 const int base_alto = 900;
 
 NodoMapa* mapaActual = NULL; // Mapa donde estás actualmente
-int mapa[MAPA_ALTO][MAPA_ANCHO]; // Matriz del mapa cargado
+int** mapa; // Matriz del mapa cargado
 
 
 GameScreen pantallaDeJuego = MENU;
 int opcionSelecionada = 0;
 Personaje jugador = {.nombre = "", .vida = 100, .ataque = 10, .defensa = 5, .velocidad_Y = 0, .enElSuelo = 0};
 
-void CargarMapa(const char* nombreArchivo, int mapa[MAPA_ALTO][MAPA_ANCHO]) 
+void CargarMapa(const char* nombreArchivo, int*** mapaPtr, int* ancho, int* alto) 
 {
     FILE* archivo = fopen(nombreArchivo, "r");
-    if (!archivo) {
-        printf("No se pudo abrir el archivo %s\n", nombreArchivo);
-        return;
+
+    fscanf(archivo, "%d\n", ancho);
+    fscanf(archivo, "%d\n", alto);
+
+    *mapaPtr = (int**)malloc((*alto) * sizeof(int*));
+    for (int y = 0;y < *alto; y++) 
+    {
+        (*mapaPtr)[y] = (int*)malloc((*ancho) * sizeof(int));
     }
 
-    for (int y = 0; y < MAPA_ALTO; y++) {
-        for (int x = 0; x < MAPA_ANCHO; x++) {
-            if (fscanf(archivo, "%d,", &mapa[y][x]) != 1) {
-                mapa[y][x] = 0; // valor por defecto si hay error
+    for (int y = 0; y < *alto; y++) 
+    {
+        for (int x = 0; x < *ancho; x++)
+        {
+            if ( x < (*ancho - 1)) 
+            {
+                fscanf(archivo, "%d,", &(*mapaPtr)[y][x]); // valor por defecto si hay error
+            }
+            else 
+            {
+                fscanf(archivo, "%d\n", &(*mapaPtr)[y][x]); // último valor de la fila
+            }
+
+            if ((*mapaPtr)[y][x] == 9)
+            {
+                jugador.x = x;
+                jugador.y = y;
+                (*mapaPtr)[y][x] = 0;
             }
         }
     }
     fclose(archivo);
 }
 
-void DibujarMapa(int mapa[MAPA_ALTO][MAPA_ANCHO], float scaleX, float scaleY)
+void DibujarMapa(int** mapa,int ancho ,int alto, float scaleX, float scaleY)
 {
-    for (int y = 0; y < MAPA_ALTO; y++) {
-        for (int x = 0; x < MAPA_ANCHO; x++) {
+    for (int y = 0; y < alto; y++) {
+        for (int x = 0; x < ancho; x++) {
             Rectangle tile = { x * 64 * scaleX, y * 64 * scaleY, 64 * scaleX, 64 * scaleY };
             switch (mapa[y][x]) {
                 case 0: DrawRectangleRec(tile, BLACK); break;         // vacío
@@ -114,49 +135,113 @@ void ActualizarPonerNombre() {
     }
 }
 
-void ActualizarGameplay() 
+void ActualizarGameplay(int** mapa, int ancho, int alto)
 {
     float deltaTime = GetFrameTime();
 
-    // Movimiento horizontal
-    int mover_x = jugador.x;
-    if (IsKeyDown(KEY_RIGHT)) mover_x++;
-    if (IsKeyDown(KEY_LEFT)) mover_x--;
+    // --- 1. Movimiento Horizontal ---
+    jugador.velocidad_X = 0.0f; // Resetear velocidad horizontal
 
-    // Verificar colisión horizontal
-    if (mover_x >= 0 && mover_x < MAPA_ANCHO) {
-        if (mapa[(int)jugador.y][mover_x] == 0) { // Solo mover si está vacío
-            jugador.x = mover_x;
-        }
+    if (IsKeyDown(KEY_RIGHT)) {
+        jugador.velocidad_X = VELOCIDAD_HORIZONTAL;
+    }
+    if (IsKeyDown(KEY_LEFT)) {
+        jugador.velocidad_X = -VELOCIDAD_HORIZONTAL;
     }
 
-    // Gravedad y salto
+    float proximaX = jugador.x + jugador.velocidad_X * deltaTime;
+
+    // Colisión Horizontal:
+    // Determinar el tile que el jugador intentará ocupar horizontalmente
+    int tileActualX = (int)jugador.x; // Tile actual del jugador
+    int tileActualY = (int)jugador.y;
+
+    int tileProximoX_derecha = (int)(proximaX + 0.99f); // Borde derecho del jugador
+    int tileProximoX_izquierda = (int)proximaX; // Borde izquierdo del jugador
+
+    // Asegurarse de que los índices no salgan de los límites del mapa
+    if (tileProximoX_derecha >= ancho) tileProximoX_derecha = ancho - 1;
+    if (tileProximoX_izquierda < 0) tileProximoX_izquierda = 0;
+    
+    // Asumimos que el jugador es de 1 tile de alto,
+    // por lo que solo necesitamos revisar el tile en la misma fila (jugador.y)
+    // para colisiones horizontales simples.
+
+    // Colisión hacia la derecha
+    if (jugador.velocidad_X > 0) { // Si se mueve a la derecha
+        // ¿El tile al que el borde DERECHO del jugador se movería es sólido?
+        if (tileProximoX_derecha < ancho && mapa[tileActualY][tileProximoX_derecha] != 0) {
+            jugador.velocidad_X = 0; // Detener movimiento horizontal
+            jugador.x = (float)tileProximoX_derecha - 1.0f; // Reposicionar justo al lado del bloque
+        } else {
+            jugador.x = proximaX; // No hay colisión, mover libremente
+        }
+    }
+    // Colisión hacia la izquierda
+    else if (jugador.velocidad_X < 0) { // Si se mueve a la izquierda
+        // ¿El tile al que el borde IZQUIERDO del jugador se movería es sólido?
+        if (tileProximoX_izquierda >= 0 && mapa[tileActualY][tileProximoX_izquierda] != 0) {
+            jugador.velocidad_X = 0; // Detener movimiento horizontal
+            jugador.x = (float)tileProximoX_izquierda + 1.0f; // Reposicionar justo al lado del bloque
+        } else {
+            jugador.x = proximaX; // No hay colisión, mover libremente
+        }
+    }
+    // Si velocidad_X es 0, no hay movimiento horizontal, no se hace nada aquí.
+    
+
+    // --- 2. Movimiento Vertical (Gravedad y Salto) ---
     jugador.velocidad_Y += GRAVEDAD * deltaTime;
     if (jugador.velocidad_Y > VELOCIDAD_MAX_CAIDA) {
         jugador.velocidad_Y = VELOCIDAD_MAX_CAIDA;
     }
 
-    float nuevaY = jugador.y + jugador.velocidad_Y * deltaTime;
+    float proximaY = jugador.y + jugador.velocidad_Y * deltaTime;
 
-    // Colisión vertical
-    if (nuevaY >= 0 && nuevaY < MAPA_ALTO) {
-        if (mapa[(int)nuevaY][jugador.x] == 0) { // Si el nuevo espacio está vacío
-            jugador.y = nuevaY;
+    // Colisión Vertical:
+    // Determinar el tile que el jugador intentará ocupar verticalmente
+    int tileProximoY_abajo = (int)(proximaY + 0.99f); // Borde inferior del jugador
+    int tileProximoY_arriba = (int)proximaY; // Borde superior del jugador
+
+    // Asegurarse de que los índices no salgan de los límites del mapa
+    if (tileProximoY_abajo >= alto) tileProximoY_abajo = alto - 1;
+    if (tileProximoY_arriba < 0) tileProximoY_arriba = 0;
+
+
+    // Colisión hacia abajo (caída)
+    if (jugador.velocidad_Y >= 0) { // Cayendo o en reposo vertical
+        // ¿El tile al que el borde INFERIOR del jugador se movería es sólido?
+        // Revisar el tile directamente debajo, y también el tile actual horizontalmente
+        // Esto asume que el jugador es de 1 tile de ancho.
+        // Si tienes un ancho de jugador real que abarca 2 tiles, tendrías que comprobar ambos.
+        if (tileProximoY_abajo < alto && mapa[tileProximoY_abajo][(int)jugador.x] != 0) {
+            jugador.velocidad_Y = 0; // Detener la caída
+            jugador.y = (float)tileProximoY_abajo; // Reposicionar justo encima del bloque
+            jugador.enElSuelo = 1; // Está en el suelo
         } else {
-            // Colisión con objeto sólido
-            jugador.velocidad_Y = 0;
-            jugador.enElSuelo = (jugador.velocidad_Y > 0); // Está en suelo si caía
+            jugador.y = proximaY; // No hay colisión, seguir cayendo
+            jugador.enElSuelo = 0; // No está en el suelo (a menos que haya chocado con el techo y se detenga ahí)
         }
     }
-
+    // Colisión hacia arriba (salto)
+    else { // Subiendo
+        // ¿El tile al que el borde SUPERIOR del jugador se movería es sólido (techo)?
+        if (tileProximoY_arriba >= 0 && mapa[tileProximoY_arriba][(int)jugador.x] != 0) {
+            jugador.velocidad_Y = 0; // Detener el salto
+            jugador.y = (float)(tileProximoY_arriba + 1); // Reposicionar justo debajo del bloque
+            jugador.enElSuelo = 0; // No está en el suelo
+        } else {
+            jugador.y = proximaY; // No hay colisión, seguir subiendo
+            jugador.enElSuelo = 0;
+        }
+    }
+    
     // Salto
     if (IsKeyPressed(KEY_UP) && jugador.enElSuelo) {
         jugador.velocidad_Y = VELOCIDAD_SALTO;
         jugador.enElSuelo = 0;
     }
 }
-
-
 
 void DrawMenu(Texture2D menuTexture, float scaleX, float scaleY) {
     DrawTextureEx(menuTexture, (Vector2){0, 0}, 0.0f, scaleX, WHITE);
@@ -172,9 +257,9 @@ void DrawNameInput(float scaleX, float scaleY) {
     DrawText("Presiona ENTER para continuar", scaleX * 400, scaleY * 300, scaleY * 20, WHITE);
 }
 
-void DrawGameplay(float scaleX, float scaleY) 
+void DrawGameplay(int** mapa, int ancho, int alto,float scaleX, float scaleY) 
 {
-  DibujarMapa(mapa, scaleX, scaleY);
+  DibujarMapa(mapa,mapaActual->ancho, mapaActual->alto, scaleX, scaleY);
     
     // Dibuja al jugador
     Rectangle playerRect = {
@@ -224,10 +309,7 @@ int main() {
     ConectarMapas(mapa3, mapa2, 3); 
 
     mapaActual = mapa1; // Comenzamos en el primer mapa
-    CargarMapa(mapaActual->archivoMapa, mapa);
-    jugador.x = 1; // Posición inicial del jugador
-    jugador.y = 1; // Posición inicial del jugador
-    mapa[(int)jugador.y][jugador.x] = 9; // Marca la posición del jugador en el mapa
+    CargarMapa(mapaActual->archivoMapa, &mapa, &mapaActual->ancho, &mapaActual->alto);
 
     while (!WindowShouldClose()) {
         int pantalla_ancho = GetScreenWidth();
@@ -237,9 +319,15 @@ int main() {
 
         // Actualización
         switch (pantallaDeJuego) {
-            case MENU: ActualizarMenu(); break;
-            case PONER_NOMBRE: ActualizarPonerNombre(); break;
-            case GAMEPLAY: ActualizarGameplay(); break;
+            case MENU:
+                ActualizarMenu(); 
+                break;
+            case PONER_NOMBRE:
+                ActualizarPonerNombre();
+                break;
+            case GAMEPLAY:
+                ActualizarGameplay(mapa,mapaActual->ancho, mapaActual->alto); 
+                break;
         }
 
         // Dibujo
@@ -249,7 +337,7 @@ int main() {
         switch (pantallaDeJuego) {
             case MENU: DrawMenu(Menu_inicial_imagen, scaleX, scaleY); break;
             case PONER_NOMBRE: DrawNameInput(scaleX, scaleY); break;
-            case GAMEPLAY: DrawGameplay(scaleX, scaleY); break;
+            case GAMEPLAY: DrawGameplay(mapa,mapaActual->ancho, mapaActual->alto,scaleX, scaleY); break;
         }
 
         EndDrawing();

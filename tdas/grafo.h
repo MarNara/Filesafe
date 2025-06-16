@@ -6,7 +6,9 @@
 
 typedef struct NodoMapa {
     int id;                        // ID único del mapa
-    char* archivoMapa;             // Ruta al archivo CSV del mapa
+    char* archivoMapa;   
+    int ancho;
+    int alto;          // Ruta al archivo CSV del mapa
     struct NodoMapa* norte;        // Puntero al mapa al norte
     struct NodoMapa* sur;          // Puntero al mapa al sur
     struct NodoMapa* este;         // Puntero al mapa al este
