@@ -1,7 +1,7 @@
 #include "raylib.h"
 #include "tdas/list.h"
-#include "tdas/extra.h"
 #include "tdas/grafo.h"
+#include "tdas/extra.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -39,7 +39,7 @@ int** mapa; // Matriz del mapa cargado
 
 GameScreen pantallaDeJuego = MENU;
 int opcionSelecionada = 0;
-Personaje jugador = {.nombre = "", .vida = 100, .ataque = 10, .defensa = 5, .velocidad_Y = 0, .enElSuelo = 0};
+Personaje jugador = {.nombre = "",.vida = 100,.ataque = 10,.defensa = 5};
 
 void CargarMapa(const char* nombreArchivo, int*** mapaPtr, int* ancho, int* alto) 
 {
@@ -83,17 +83,18 @@ void DibujarMapa(int** mapa,int ancho ,int alto, float scaleX, float scaleY)
     for (int y = 0; y < alto; y++) {
         for (int x = 0; x < ancho; x++) {
             Rectangle tile = { x * 64 * scaleX, y * 64 * scaleY, 64 * scaleX, 64 * scaleY };
+            
             switch (mapa[y][x]) {
                 case 0: DrawRectangleRec(tile, BLACK); break;         // vacío
-                case 1: DrawRectangleRec(tile, GRAY); break;          // plataforma
-                case 2: DrawRectangleRec(tile, RED); break;           // enemigo
-                case 3: DrawRectangleRec(tile, BLUE); break;          // trampa eléctrica
-                case 4: DrawRectangleRec(tile, DARKGRAY); break;      // escombro
-                case 5: DrawRectangleRec(tile, ORANGE); break;        // compuerta
-                case 6: DrawRectangleRec(tile, GREEN); break;         // consola
-                case 7: DrawRectangleRec(tile, PURPLE); break;        // escalera
-                case 8: DrawRectangleRec(tile, GOLD); break;          // objeto
-                default: DrawRectangleRec(tile, BLACK); break;        // por defecto
+                case 1: DrawRectangleRec(tile, GRAY); break;         // plataforma
+                case 2: DrawRectangleRec(tile, RED); break;          // enemigo
+                case 3: DrawRectangleRec(tile, BLUE); break;         // trampa eléctrica
+                case 4: DrawRectangleRec(tile, DARKGRAY); break;     // escombro
+                case 5: DrawRectangleRec(tile, ORANGE); break;       // compuerta
+                case 6: DrawRectangleRec(tile, GREEN); break;        // consola
+                case 7: DrawRectangleRec(tile, PURPLE); break;       // escalera
+                case 8: DrawRectangleRec(tile, GOLD); break;         // objeto
+                case 9: DrawRectangleRec(tile, WHITE); break;        // jugador inicio
             }
         }
     }
@@ -289,10 +290,11 @@ void DrawGameplay(int** mapa, int ancho, int alto,float scaleX, float scaleY)
 }
 
 
+
 int main() {
     SetConfigFlags(FLAG_WINDOW_RESIZABLE);
     InitWindow(base_ancho, base_alto, "El inicio de una aventura");
-    SetTargetFPS(60);
+    SetTargetFPS(20);
 
     Image image = LoadImage("base/Menu_incial.png");
     ImageResize(&image, base_ancho, base_alto);
