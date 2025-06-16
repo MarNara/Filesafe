@@ -1,1 +1,1 @@
-gcc pruebas.c tdas/grafo.c -o test.exe -IC:\raylib\include -LC:\raylib\lib -lraylib -lwinmm -lgdi32 -luser32
+gcc final.c tdas/grafo.c -o test.exe -IC:\raylib\include -LC:\raylib\lib -lraylib -lwinmm -lgdi32 -luser32
