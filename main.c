@@ -2,21 +2,54 @@
 #include "tdas/extra.h"
 #include <stdio.h>
 #include <stdlib.h>
-
-#include <stdio.h>
-#include <stdlib.h>
 #include <string.h>
+#define MAX_FIL 1000
+#define MAX_COL 1000
 
 // Variables globales
 char playerName[50];
 int gameRunning = 0;
 
+//crear estructuras
+typedef struct{
+    char nombre[10];
+    int vida;
+    int posicion;
+    List* inventario;
+}Jugador;
+
+typedef struct{
+    char nombre[10];
+    int posicion;
+    int vida;
+    int ataque;
+}NPC;
+
+typedef struct{
+    char nombre[10];
+    char tipo[100];
+    int poder; //solo aplica para armas
+    int posicion;
+}Item;
+
+typedef struct{
+    int id[200];
+    char nombre[10];
+    int matriz_mapa[MAX_FIL][MAX_COL];
+    List* npc;
+    List* items;
+}Escenario;
+
+typedef struct{
+    List* escenarios;
+    Jugador* personaje_del_jugador;
+    Escenario* escenario_actual;
+}Juego;
 // Prototipos
 void elegirNombre();
 void menuInicial();
 void menuJuego();
 void menuLucha();
-
 
 void elegirNombre() {
     printf("\n--- Elegir Nombre ---\n");
