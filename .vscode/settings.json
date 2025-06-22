@@ -1,6 +1,9 @@
 {
     "files.associations": {
         "list.h": "c",
-        "extra.h": "c"
+        "extra.h": "c",
+        "stdio.h": "c",
+        "stack.h": "c",
+        "hashmap.h": "c"
     }
 }

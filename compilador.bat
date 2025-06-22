@@ -1,1 +1,1 @@
-gcc final.c tdas/grafo.c -o test.exe -IC:\raylib\include -LC:\raylib\lib -lraylib -lwinmm -lgdi32 -luser32
+gcc -o juego final2.c tdas/hashmap.c tdas/movimiento.c tdas/grafo.c tdas/list.c tdas/extra.c -lraylib -lm
