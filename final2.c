@@ -4,6 +4,7 @@
 #include "tdas/extra.h"
 #include "tdas/movimiento.h"  // Incluimos la biblioteca de movimiento
 #include "tdas/hashmap.h"
+#include "tdas/sprite.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -49,6 +50,8 @@ int inventarioSeleccionado = 0;
 Personaje jugador;  // Ahora se inicializará con InicializarPersonaje()
 
 Camera2D camara = {0};
+
+List* spritesActivos = NULL; // Lista de sprites activos
 
 // --- FUNCION AUXILIAR PARA MENSAJES EN PANTALLA ---
 void MostrarMensaje(const char* mensaje) {
@@ -439,6 +442,14 @@ void DrawGameplay(float scaleX, float scaleY) {
             TILE_SIZE,
             TILE_SIZE
         };
+    // Dibujar sprites animados
+    Node* nodo = spritesActivos->head;
+    while (nodo) {
+        Sprite* s = (Sprite*)nodo->data;
+        ActualizarSprite(s, GetFrameTime());
+        DibujarSprite(s);
+        nodo = nodo->next;
+    }
         DrawRectangleRec(playerRect, GRAY);
         Rectangle head = {
             playerRect.x + playerRect.width * 0.25f,
@@ -510,6 +521,16 @@ int main() {
     InitWindow(BASE_ANCHO, BASE_ALTO, "FILESAFE");
     //MaximizeWindow();
     SetTargetFPS(60);
+
+    spritesActivos = list_create();
+
+    // Ejemplo de sprites
+    Sprite* enemigo = CrearSprite("sprites/enemigo.png", 4, 0.15f, (Vector2){500, 400});
+    list_pushBack(spritesActivos, enemigo);
+
+    Sprite* fuego = CrearSprite("sprites/fuego.png", 3, 0.1f, (Vector2){600, 500});
+    list_pushBack(spritesActivos, fuego);
+
 
     // Inicializar el jugador usando la función de la biblioteca
     InicializarPersonaje(&jugador);
@@ -604,6 +625,14 @@ int main() {
         free(todosLosMapas[i]->archivoMapa);
     }
     LiberarGrafo(todosLosMapas, cantidadMapas);
+
+    Node* nodo = spritesActivos->head;
+    while (nodo) {
+        LiberarSprite((Sprite*)nodo->data);
+        nodo = nodo->next;
+    }
+    list_clean(spritesActivos);
+    free(spritesActivos);
 
     CloseWindow();
     return 0;

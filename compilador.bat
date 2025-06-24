@@ -1,1 +1,1 @@
-gcc -o juego final2.c tdas/hashmap.c tdas/movimiento.c tdas/grafo.c tdas/list.c tdas/extra.c -lraylib -lm
+gcc -o juego final2.c tdas/sprite.c tdas/hashmap.c tdas/movimiento.c tdas/grafo.c tdas/list.c tdas/extra.c -lraylib -lm
