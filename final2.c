@@ -35,6 +35,7 @@ typedef enum GameScreen
 } GameScreen;
 
 // --- VARIABLES GLOBALES ---
+Sprite* spriteJugador = NULL;
 NodoMapa* mapaActual = NULL;
 int** mapa; // Matriz del mapa cargado dinámicamente
 NodoMapa* mapaInicial = NULL;
@@ -316,7 +317,7 @@ void ActualizarGameplay()
 
     // Usamos la función de la biblioteca para manejar todo el movimiento
     ActualizarMovimiento(&jugador, mapaActual->ancho, mapaActual->alto, delta, VerificarColision);
-    
+
     if (jugador.vida <= 0) {
     pantallaDeJuego = GAME_OVER;
     }
@@ -436,31 +437,25 @@ void DrawNameInput(float scaleX, float scaleY) {
 void DrawGameplay(float scaleX, float scaleY) {
     BeginMode2D(camara);
         DibujarMapa(mapa, mapaActual->ancho, mapaActual->alto);
-        Rectangle playerRect = {
-            jugador.posicion.x,
-            jugador.posicion.y,
-            TILE_SIZE,
-            TILE_SIZE
-        };
-    // Dibujar sprites animados
-    Node* nodo = spritesActivos->head;
-    while (nodo) {
-        Sprite* s = (Sprite*)nodo->data;
-        ActualizarSprite(s, GetFrameTime());
-        DibujarSprite(s);
-        nodo = nodo->next;
-    }
-        DrawRectangleRec(playerRect, GRAY);
-        Rectangle head = {
-            playerRect.x + playerRect.width * 0.25f,
-            playerRect.y,
-            playerRect.width * 0.5f,
-            playerRect.height * 0.5f
-        };
-        DrawRectangleRec(head,  GREEN);
+        
+        // Dibujar sprites externos (enemigos, fuego, etc.)
+        Node* nodo = spritesActivos->head;
+        while (nodo) {
+            Sprite* s = (Sprite*)nodo->data;
+            // Actualizar posición si es necesario
+            ActualizarSprite(s, GetFrameTime());
+            DibujarSprite(s, s->position); // Usar la posición del sprite
+            nodo = nodo->next;
+        }
+
+        // Dibujar sprite del jugador
+        ActualizarSprite(jugador.spriteActual, GetFrameTime());
+        DibujarSprite(jugador.spriteActual, jugador.posicion);
+
+        // Dibujar nombre del jugador
         DrawText(jugador.nombre,
-                 (int)(playerRect.x + playerRect.width / 2 - MeasureText(jugador.nombre, 20) / 2),
-                 (int)(playerRect.y - 25),
+                 (int)(jugador.posicion.x + TILE_SIZE / 2 - MeasureText(jugador.nombre, 20) / 2),
+                 (int)(jugador.posicion.y - 25),
                  20, WHITE);
     EndMode2D();
 
@@ -524,17 +519,14 @@ int main() {
 
     spritesActivos = list_create();
 
-    // Ejemplo de sprites
-    Sprite* enemigo = CrearSprite("sprites/enemigo.png", 4, 0.15f, (Vector2){500, 400});
+    Sprite* enemigo = CrearSprite("sprites/enemigo.png", 1, 0.15f, 
+        (Vector2){ 8 * TILE_SIZE + TILE_SIZE / 2, 6 * TILE_SIZE + TILE_SIZE / 2 });
     list_pushBack(spritesActivos, enemigo);
 
-    Sprite* fuego = CrearSprite("sprites/fuego.png", 3, 0.1f, (Vector2){600, 500});
+    Sprite* fuego = CrearSprite("sprites/fuego.png", 1, 0.1f, 
+        (Vector2){ 10 * TILE_SIZE + TILE_SIZE / 2, 7 * TILE_SIZE + TILE_SIZE / 2 });
     list_pushBack(spritesActivos, fuego);
-
-
-    // Inicializar el jugador usando la función de la biblioteca
-    InicializarPersonaje(&jugador);
-
+    
     // Cargar imagen de menú
     Image image = LoadImage("base/Menu_incial.png");
     Texture2D Menu_inicial_imagen = LoadTextureFromImage(image);
@@ -559,7 +551,17 @@ int main() {
     ConectarMapas(mapa3, mapa2, 3);
 
     mapaActual = mapa1;
+    InicializarPersonaje(&jugador);
+
     CargarMapa(mapaActual->archivoMapa, &mapa, &mapaActual->ancho, &mapaActual->alto);
+
+    // Inicializar el jugador usando la función de la biblioteca
+    
+    jugador.spriteIdle = CrearSprite("sprites/prota_idle.png", 4, 0.15f, jugador.posicion);
+    jugador.spriteJump = CrearSprite("sprites/prota_jump.png", 1, 0.2f, jugador.posicion);
+    jugador.spriteClimb = CrearSprite("sprites/prota_climb.png", 1, 0.2f, jugador.posicion);
+    jugador.spriteRun  = CrearSprite("sprites/prota_run.png", 6, 0.12f, jugador.posicion);
+    jugador.spriteActual = jugador.spriteIdle;
 
     // Lista para llevar un registro de todos los nodos del grafo
     NodoMapa* todosLosMapas[] = {mapa1, mapa2, mapa3};

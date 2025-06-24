@@ -223,14 +223,63 @@ void ManejarSaltos(Personaje *jugador, float delta) {
 // Función principal que coordina todas las acciones de movimiento
 void ActualizarMovimiento(Personaje *jugador, int anchoMapa, int altoMapa, float delta, bool (*VerificarColision)(int, int, int, int)) {
     ProcesarEntradas(jugador);
+
+    // 1. Saltos antes del movimiento para que el salto tenga efecto antes de mover
+    ManejarSaltos(jugador, delta);
+
+    // 2. Físicas generales
     AplicarFisicas(jugador, delta);
+
+    // 3. Dash (modifica velocidad)
     ManejarDash(jugador, delta);
-    
+
+    // 4. Calcular nueva posición
     Vector2 nuevaPos = jugador->posicion;
     nuevaPos.x += jugador->velocidad.x * delta;
     nuevaPos.y += jugador->velocidad.y * delta;
-    
+
+    // 5. Colisiones y entorno
     ManejarColisiones(jugador, nuevaPos, anchoMapa, altoMapa, VerificarColision);
     ManejarParedes(jugador, anchoMapa, altoMapa, VerificarColision);
-    ManejarSaltos(jugador, delta);
+
+    // 6. Actualizar sprite según estado
+    if (!jugador->enSuelo) {
+        jugador->spriteActual = jugador->spriteJump;
+    } 
+    else if (jugador->enParedIzquierda || jugador->enParedDerecha) {
+        jugador->spriteActual = jugador->spriteClimb;
+    }
+    else if (fabs(jugador->velocidad.x) > 5.0f) { // Umbral más bajo
+        jugador->spriteActual = jugador->spriteRun;
+    } 
+    else {
+        jugador->spriteActual = jugador->spriteIdle;
+    }
+    ActualizarSpriteJugador(jugador);
+}
+
+void ActualizarSpriteJugador(Personaje* jugador) {
+    // Prioridad 1: Dash
+    if (jugador->estaDashing) {
+        jugador->spriteActual = jugador->spriteRun; // O un spriteDash si lo tienes
+    }
+    // Prioridad 2: Escalando paredes
+    else if ((jugador->enParedIzquierda || jugador->enParedDerecha) && !jugador->enSuelo) {
+        jugador->spriteActual = jugador->spriteClimb;
+    }
+    // Prioridad 3: Saltando/cayendo
+    else if (!jugador->enSuelo) {
+        jugador->spriteActual = jugador->spriteJump;
+    }
+    // Prioridad 4: Corriendo
+    else if (fabs(jugador->velocidad.x) > 5.0f) {
+        jugador->spriteActual = jugador->spriteRun;
+    }
+    // Por defecto: Idle
+    else {
+        jugador->spriteActual = jugador->spriteIdle;
+    }
+    
+    // Sincronizar posición
+    jugador->spriteActual->position = jugador->posicion;
 }

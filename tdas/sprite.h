@@ -3,19 +3,19 @@
 
 #include "raylib.h"
 
-typedef struct Sprite {
+typedef struct {
     Texture2D texture;
     Rectangle frameRec;
     int frameCount;
     int currentFrame;
     float frameTime;
     float timeCounter;
-    Vector2 position;
+    Vector2 position; // Posición del sprite
 } Sprite;
 
 Sprite* CrearSprite(const char* ruta, int frameCount, float frameTime, Vector2 pos);
 void ActualizarSprite(Sprite* s, float deltaTime);
-void DibujarSprite(Sprite* s);
+void DibujarSprite(Sprite* s, Vector2 posicion);
 void LiberarSprite(Sprite* s);
 
 #endif
