@@ -59,8 +59,10 @@ typedef struct {
     HashMap *inventario;
 
     // Sprites
-    Sprite *spriteIdle;
-    Sprite *spriteJump;
+    Sprite* spriteIdleStart;  // Para el idle inicial
+    Sprite* spriteIdleWalk;   // Para el ciclo de caminata
+    Sprite* spriteJumpUp;     // Salto (al presionar espacio)
+    Sprite* spriteJumpDown;   // Caída
     Sprite *spriteClimb;
     Sprite *spriteRun;
     Sprite *spriteActual;

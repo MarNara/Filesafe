@@ -586,11 +586,13 @@ int main() {
 
     // Inicializar el jugador usando la función de la biblioteca
     
-    jugador.spriteIdle = CrearSprite("sprites/prota_idle.png", 2, 0.15f, jugador.posicion);
-    jugador.spriteJump = CrearSprite("sprites/prota_jump.png", 2, 0.2f, jugador.posicion);
+    jugador.spriteIdleStart = CrearSprite("sprites/prota_idle_start.png", 1, 0.2f, jugador.posicion);
+    jugador.spriteIdleWalk = CrearSprite("sprites/prota_idle_walk.png", 2, 0.2f, jugador.posicion);
+    jugador.spriteJumpUp = CrearSprite("sprites/prota_jump_up.png", 1, 0.1f, jugador.posicion);
+    jugador.spriteJumpDown = CrearSprite("sprites/prota_jump_down.png", 1, 0.1f, jugador.posicion);
     jugador.spriteClimb = CrearSprite("sprites/prota_climb.png", 1, 0.2f, jugador.posicion);
     jugador.spriteRun  = CrearSprite("sprites/prota_run.png", 1, 0.12f, jugador.posicion);
-    jugador.spriteActual = jugador.spriteIdle;
+    jugador.spriteActual = jugador.spriteIdleStart;
 
     // Lista para llevar un registro de todos los nodos del grafo
     NodoMapa* todosLosMapas[] = {mapa1, mapa2, mapa3};

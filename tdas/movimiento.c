@@ -252,41 +252,47 @@ void ActualizarSpriteJugador(Personaje* jugador) {
     // Configuración del offset visual
     jugador->offsetVisual = (Vector2){0, -32};
     
-    // Determinar dirección general
+    // Determinar dirección
     bool moviendoseDerecha = jugador->velocidad.x > 0.1f;
     bool moviendoseIzquierda = jugador->velocidad.x < -0.1f;
-    
-    // Lógica de selección de animación
+
+    // Lógica de prioridades de animación
     if (jugador->estaDashing) {
         jugador->spriteActual = jugador->spriteRun;
         jugador->spriteActual->flipX = !moviendoseDerecha;
     }
     else if ((jugador->enParedIzquierda || jugador->enParedDerecha) && !jugador->enSuelo) {
         jugador->spriteActual = jugador->spriteClimb;
-        
-        // Lógica especial para escalar (sprite normal muestra agarre a la derecha)
-        if (jugador->enParedIzquierda) {
-            // Si está en pared izquierda, volteamos el sprite (para que aparezca agarrando a la izquierda)
-            jugador->spriteActual->flipX = true;
-        } else {
-            // Si está en pared derecha, mostramos normal (agarrando a la derecha)
-            jugador->spriteActual->flipX = false;
-        }
+        jugador->spriteActual->flipX = jugador->enParedIzquierda;
     }
     else if (!jugador->enSuelo) {
-        jugador->spriteActual = jugador->spriteJump;
+        // Animaciones de salto/caída
+        if (jugador->velocidad.y < -0.1f) { // Subiendo
+            jugador->spriteActual = jugador->spriteJumpUp;
+        } else { // Bajando o en pico
+            jugador->spriteActual = jugador->spriteJumpDown;
+        }
         jugador->spriteActual->flipX = !moviendoseDerecha;
     }
     else if (fabs(jugador->velocidad.x) > 5.0f) {
-        jugador->spriteActual = jugador->spriteIdle;
+        // Animación de caminar
+        static bool primerPaso = true;
+        
+        if (primerPaso) {
+            jugador->spriteActual = jugador->spriteIdleStart;
+            // Cambiar a walk después de completar un ciclo
+            if (jugador->spriteActual->currentFrame >= jugador->spriteActual->frameCount-1) {
+                primerPaso = false;
+            }
+        } else {
+            jugador->spriteActual = jugador->spriteIdleWalk;
+        }
         jugador->spriteActual->flipX = !moviendoseDerecha;
     }
     else {
-        jugador->spriteActual = jugador->spriteIdle;
-        // Mantener la última dirección en idle
-        if (fabs(jugador->velocidad.x) > 0.1f) {
-            jugador->spriteActual->flipX = !moviendoseDerecha;
-        }
+        // Volver a idle start cuando se detiene
+        jugador->spriteActual = jugador->spriteIdleStart;
+        jugador->spriteActual->flipX = !moviendoseDerecha;
     }
     
     // Sincronizar posición con offset
