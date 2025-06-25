@@ -507,7 +507,7 @@ void DrawGameplay(float scaleX, float scaleY) {
 
 void DrawGameOver(float scaleX, float scaleY) {
     DrawText("GAME OVER", (int)(scaleX * 500), (int)(scaleY * 300), (int)(scaleY * 50), RED);
-    DrawText("Presiona ENTER para volver al menu", (int)(scaleX * 400), (int)(scaleY * 400), (int)(scaleY * 20), WHITE);
+    DrawText("Presiona ENTER para volver al menu", (int)(scaleX * 400), (int)(scaleY * 400), (int)(scaleY * 30), WHITE);
 }
 
 // --- MAIN FUNCTION ---
