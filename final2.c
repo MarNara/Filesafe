@@ -211,15 +211,15 @@ void DibujarMapa(int** mapa, int ancho, int alto)
             Rectangle tile = { x * TILE_SIZE, y * TILE_SIZE, TILE_SIZE, TILE_SIZE };
 
             switch (mapa[y][x]) {
-                case 0: DrawRectangleRec(tile, BLACK); break;
-                case 1: DrawRectangleRec(tile, GRAY); break;
+                case 0: DrawRectangleRec(tile, BLACK); break;//vacios, es decir donde el jugador puede caminar libremente.
+                case 1: DrawRectangleRec(tile, GRAY); break;//esta indica los cubitos que forman la plataforma.
                 case 2: DrawRectangleRec(tile, RED); break;
                 case 3: DrawRectangleRec(tile, BLUE); break;
                 case 4: DrawRectangleRec(tile, DARKGRAY); break;
                 case 5: DrawRectangleRec(tile, ORANGE); break;
                 case 6: DrawRectangleRec(tile, GREEN); break;
                 case 7: DrawRectangleRec(tile, PURPLE); break;
-                case 8: DrawRectangleRec(tile, GOLD); break;
+                case 8: DrawRectangleRec(tile, GOLD); break;//bloque de daño al jugador
                 default: DrawRectangleRec(tile, BLACK); break;
             }
         }
@@ -397,10 +397,16 @@ void ActualizarGameOver() {
 // --- FUNCIONES DE DIBUJO ---
 void DrawMenu(Texture2D menuTexture, float scaleX, float scaleY) {
     DrawTextureEx(menuTexture, (Vector2){0, 0}, 0.0f, scaleX, WHITE);
+    
     DrawText("MENU PRINCIPAL", (int)(scaleX * 480), (int)(scaleY * 200), (int)(scaleY * 40), WHITE);
     DrawText("Iniciar Juego", (int)(scaleX * 540), (int)(scaleY * 300), (int)(scaleY * 30), opcionSelecionada == 0 ? RED : WHITE);
     DrawText("Salir", (int)(scaleX * 540), (int)(scaleY * 350), (int)(scaleY * 30), opcionSelecionada == 1 ? RED : WHITE);
     DrawText("Usa Flechas ARRIBA/ABAJO y ENTER para elegir", (int)(scaleX * 360), (int)(scaleY * 500), (int)(scaleY * 20), WHITE);
+    /*1er:
+    2do:
+    3ro:
+    4to: parametro modificación del tamaño del texto
+    5to: color*/
 }
 
 void DibujarInventarioInteractivo(float x, float y, float lineHeight) {
