@@ -12,13 +12,11 @@ Abre la terminal con ctrl + ñ.
 En la terminal bash, compila el programa con el siguiente comando :
 
 ## Para agregar el avance de solo un archivo: 
-Ejemplo:
-
 ```bash
 git add README.md
 ```
 ```bash
-git commit -m "avance red"
+git commit -m "avance"
 ```
 ```bash
 git push origin main
