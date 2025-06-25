@@ -54,6 +54,8 @@ Camera2D camara = {0};
 
 List* spritesActivos = NULL; // Lista de sprites activos
 
+Texture2D texturasMapa[4]; // 0: pared, 1: suelo, 2: pared_izq, 3: pared_der
+
 // --- FUNCION AUXILIAR PARA MENSAJES EN PANTALLA ---
 void MostrarMensaje(const char* mensaje) {
     strncpy(mensajePantalla, mensaje, sizeof(mensajePantalla) - 1);
@@ -208,19 +210,34 @@ void DibujarMapa(int** mapa, int ancho, int alto)
 {
     for (int y = 0; y < alto; y++) {
         for (int x = 0; x < ancho; x++) {
-            Rectangle tile = { x * TILE_SIZE, y * TILE_SIZE, TILE_SIZE, TILE_SIZE };
+            int tipo = mapa[y][x];
+            Rectangle destino = { x * TILE_SIZE, y * TILE_SIZE, TILE_SIZE, TILE_SIZE };
 
-            switch (mapa[y][x]) {
-                case 0: DrawRectangleRec(tile, BLACK); break;
-                case 1: DrawRectangleRec(tile, GRAY); break;
-                case 2: DrawRectangleRec(tile, RED); break;
-                case 3: DrawRectangleRec(tile, BLUE); break;
-                case 4: DrawRectangleRec(tile, DARKGRAY); break;
-                case 5: DrawRectangleRec(tile, ORANGE); break;
-                case 6: DrawRectangleRec(tile, GREEN); break;
-                case 7: DrawRectangleRec(tile, PURPLE); break;
-                case 8: DrawRectangleRec(tile, GOLD); break;
-                default: DrawRectangleRec(tile, BLACK); break;
+            switch (tipo) {
+                case 0:  // Pared
+                case 1:  // Suelo
+                case -1: // Pared izquierda
+                case -2: // Pared derecha
+                {
+                    int index;
+                    if (tipo == 0) index = 0;
+                    else if (tipo == 1) index = 1;
+                    else if (tipo == -1) index = 2;
+                    else index = 3;
+
+                    Texture2D textura = texturasMapa[index];
+                    Rectangle origen = { 0, 0, (float)textura.width, (float)textura.height };
+                    DrawTexturePro(textura, origen, destino, (Vector2){0, 0}, 0.0f, WHITE);
+                    break;
+                }
+                case 2: DrawRectangleRec(destino, RED); break;
+                case 3: DrawRectangleRec(destino, BLUE); break;
+                case 4: DrawRectangleRec(destino, DARKGRAY); break;
+                case 5: DrawRectangleRec(destino, ORANGE); break;
+                case 6: DrawRectangleRec(destino, GREEN); break;
+                case 7: DrawRectangleRec(destino, PURPLE); break;
+                case 8: DrawRectangleRec(destino, GOLD); break;
+                default: DrawRectangleRec(destino, BLACK); break;
             }
         }
     }
@@ -231,8 +248,9 @@ bool VerificarColision(int tileX, int tileY, int anchoMapa, int altoMapa) {
     if (tileX < 0 || tileY < 0 || tileX >= anchoMapa || tileY >= altoMapa) 
         return false;
     
-    // Solo colisiona con el tipo 1 (plataforma)
-    return (mapa[tileY][tileX] == 1);
+    int tipo = mapa[tileY][tileX];
+    // Solo colisiona con el tipo 1, -1 y -2 (plataforma y paredes)
+    return (tipo == 1 || tipo == -1 || tipo == -2);
 }
 
 // --- FUNCIONES DE PANTALLA ---
@@ -478,12 +496,11 @@ void DrawGameplay(float scaleX, float scaleY) {
             int tile = mapa[y][x];
             Color color = BLANK;
 
-            if (tile == 1) color = GRAY;         // plataforma
-            else if (tile == 4) color = GREEN;   // fruta
-            else if (tile == 6 || tile == 7 || tile == 8) color = RED;  // peligros
-            // puedes añadir más colores según el tipo
+            if (tile == 1 || tile == -1 || tile == -2) color = GRAY;     // plataformas y paredes
+            else if (tile == 4) color = GREEN;                           // fruta
+            else if (tile == 6 || tile == 7 || tile == 8) color = RED;   // peligros
 
-            if (color.a != 0) { // si no es BLANK, dibuja
+            if (color.a != 0) {
                 DrawRectangle(offsetX + x * tileWidth, offsetY + y * tileHeight, tileWidth, tileHeight, color);
             }
         }
@@ -532,6 +549,11 @@ int main() {
     Texture2D Menu_inicial_imagen = LoadTextureFromImage(image);
     UnloadImage(image);
 
+    texturasMapa[0] = LoadTexture("sprites/pared.JPG");        // para tile 0
+    texturasMapa[1] = LoadTexture("sprites/suelo.jpeg");        // para tile 1
+    texturasMapa[2] = LoadTexture("sprites/pared_izq.jpeg");    // para tile -1
+    texturasMapa[3] = LoadTexture("sprites/pared_der.jpeg");    // para tile -2
+
     // Inicializar la cámara
     camara.target = jugador.posicion;
     camara.offset = (Vector2){ BASE_ANCHO / 2.0f, BASE_ALTO / 2.0f };
@@ -557,10 +579,10 @@ int main() {
 
     // Inicializar el jugador usando la función de la biblioteca
     
-    jugador.spriteIdle = CrearSprite("sprites/prota_idle.png", 4, 0.15f, jugador.posicion);
-    jugador.spriteJump = CrearSprite("sprites/prota_jump.png", 1, 0.2f, jugador.posicion);
+    jugador.spriteIdle = CrearSprite("sprites/prota_idle.png", 2, 0.15f, jugador.posicion);
+    jugador.spriteJump = CrearSprite("sprites/prota_jump.png", 2, 0.2f, jugador.posicion);
     jugador.spriteClimb = CrearSprite("sprites/prota_climb.png", 1, 0.2f, jugador.posicion);
-    jugador.spriteRun  = CrearSprite("sprites/prota_run.png", 6, 0.12f, jugador.posicion);
+    jugador.spriteRun  = CrearSprite("sprites/prota_run.png", 1, 0.12f, jugador.posicion);
     jugador.spriteActual = jugador.spriteIdle;
 
     // Lista para llevar un registro de todos los nodos del grafo
@@ -635,6 +657,9 @@ int main() {
     }
     list_clean(spritesActivos);
     free(spritesActivos);
+    for (int i = 0; i < 4; i++) {
+    UnloadTexture(texturasMapa[i]);
+    }
 
     CloseWindow();
     return 0;
