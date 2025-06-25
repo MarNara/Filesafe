@@ -11,6 +11,7 @@ void InicializarPersonaje(Personaje *jugador) {
         .defensa = 5,
         .posicion = {0, 0},
         .velocidad = {0, 0},
+        .offsetVisual = {0, -32},
         .inventario = createMap(100),
         .enSuelo = false,
         .tiempoCoyote = TIEMPO_COYOTE,
@@ -113,7 +114,8 @@ void ManejarColisiones(Personaje *jugador, Vector2 nuevaPos, int anchoMapa, int 
 
     // --- Colisión Vertical ---
     int col_arriba_px = (int)nuevaPos.y;
-    int col_abajo_px = (int)(nuevaPos.y + TILE_SIZE - 1);
+    int col_abajo_px = (int)(nuevaPos.y + TILE_SIZE + 2); // tolerancia de +2 px
+    //int col_abajo_px = (int)(nuevaPos.y + TILE_SIZE - 1);
     int col_izq_x_px = (int)nuevaPos.x;
     int col_der_x_px = (int)(nuevaPos.x + TILE_SIZE - 1);
 
@@ -243,43 +245,53 @@ void ActualizarMovimiento(Personaje *jugador, int anchoMapa, int altoMapa, float
     ManejarParedes(jugador, anchoMapa, altoMapa, VerificarColision);
 
     // 6. Actualizar sprite según estado
-    if (!jugador->enSuelo) {
-        jugador->spriteActual = jugador->spriteJump;
-    } 
-    else if (jugador->enParedIzquierda || jugador->enParedDerecha) {
-        jugador->spriteActual = jugador->spriteClimb;
-    }
-    else if (fabs(jugador->velocidad.x) > 5.0f) { // Umbral más bajo
-        jugador->spriteActual = jugador->spriteRun;
-    } 
-    else {
-        jugador->spriteActual = jugador->spriteIdle;
-    }
     ActualizarSpriteJugador(jugador);
 }
 
 void ActualizarSpriteJugador(Personaje* jugador) {
-    // Prioridad 1: Dash
+    // Configuración del offset visual
+    jugador->offsetVisual = (Vector2){0, -32};
+    
+    // Determinar dirección general
+    bool moviendoseDerecha = jugador->velocidad.x > 0.1f;
+    bool moviendoseIzquierda = jugador->velocidad.x < -0.1f;
+    
+    // Lógica de selección de animación
     if (jugador->estaDashing) {
-        jugador->spriteActual = jugador->spriteRun; // O un spriteDash si lo tienes
+        jugador->spriteActual = jugador->spriteRun;
+        jugador->spriteActual->flipX = !moviendoseDerecha;
     }
-    // Prioridad 2: Escalando paredes
     else if ((jugador->enParedIzquierda || jugador->enParedDerecha) && !jugador->enSuelo) {
         jugador->spriteActual = jugador->spriteClimb;
+        
+        // Lógica especial para escalar (sprite normal muestra agarre a la derecha)
+        if (jugador->enParedIzquierda) {
+            // Si está en pared izquierda, volteamos el sprite (para que aparezca agarrando a la izquierda)
+            jugador->spriteActual->flipX = true;
+        } else {
+            // Si está en pared derecha, mostramos normal (agarrando a la derecha)
+            jugador->spriteActual->flipX = false;
+        }
     }
-    // Prioridad 3: Saltando/cayendo
     else if (!jugador->enSuelo) {
         jugador->spriteActual = jugador->spriteJump;
+        jugador->spriteActual->flipX = !moviendoseDerecha;
     }
-    // Prioridad 4: Corriendo
     else if (fabs(jugador->velocidad.x) > 5.0f) {
-        jugador->spriteActual = jugador->spriteRun;
+        jugador->spriteActual = jugador->spriteIdle;
+        jugador->spriteActual->flipX = !moviendoseDerecha;
     }
-    // Por defecto: Idle
     else {
         jugador->spriteActual = jugador->spriteIdle;
+        // Mantener la última dirección en idle
+        if (fabs(jugador->velocidad.x) > 0.1f) {
+            jugador->spriteActual->flipX = !moviendoseDerecha;
+        }
     }
     
-    // Sincronizar posición
-    jugador->spriteActual->position = jugador->posicion;
+    // Sincronizar posición con offset
+    jugador->spriteActual->position = (Vector2){
+        jugador->posicion.x + jugador->offsetVisual.x,
+        jugador->posicion.y + jugador->offsetVisual.y
+    };
 }

@@ -474,7 +474,8 @@ void DrawGameplay(float scaleX, float scaleY) {
 
         // Dibujar sprite del jugador
         ActualizarSprite(jugador.spriteActual, GetFrameTime());
-        DibujarSprite(jugador.spriteActual, jugador.posicion);
+        DibujarSprite(jugador.spriteActual, 
+              (Vector2){jugador.posicion.x, jugador.posicion.y + jugador.offsetVisual.y});
 
         // Dibujar nombre del jugador
         DrawText(jugador.nombre,

@@ -34,6 +34,7 @@ typedef struct {
     Vector2 posicion;
     Vector2 spawn;
     Vector2 velocidad;
+    Vector2 offsetVisual;
 
     // Estados
     bool enSuelo;

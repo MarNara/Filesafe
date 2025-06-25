@@ -11,6 +11,7 @@ typedef struct {
     float frameTime;
     float timeCounter;
     Vector2 position; // Posición del sprite
+    bool flipX;
 } Sprite;
 
 Sprite* CrearSprite(const char* ruta, int frameCount, float frameTime, Vector2 pos);
