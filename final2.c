@@ -415,10 +415,16 @@ void ActualizarGameOver() {
 // --- FUNCIONES DE DIBUJO ---
 void DrawMenu(Texture2D menuTexture, float scaleX, float scaleY) {
     DrawTextureEx(menuTexture, (Vector2){0, 0}, 0.0f, scaleX, WHITE);
+    
     DrawText("MENU PRINCIPAL", (int)(scaleX * 480), (int)(scaleY * 200), (int)(scaleY * 40), WHITE);
     DrawText("Iniciar Juego", (int)(scaleX * 540), (int)(scaleY * 300), (int)(scaleY * 30), opcionSelecionada == 0 ? RED : WHITE);
     DrawText("Salir", (int)(scaleX * 540), (int)(scaleY * 350), (int)(scaleY * 30), opcionSelecionada == 1 ? RED : WHITE);
     DrawText("Usa Flechas ARRIBA/ABAJO y ENTER para elegir", (int)(scaleX * 360), (int)(scaleY * 500), (int)(scaleY * 20), WHITE);
+    /*1er:
+    2do:
+    3ro:
+    4to: parametro modificación del tamaño del texto
+    5to: color*/
 }
 
 void DibujarInventarioInteractivo(float x, float y, float lineHeight) {
@@ -524,7 +530,7 @@ void DrawGameplay(float scaleX, float scaleY) {
 
 void DrawGameOver(float scaleX, float scaleY) {
     DrawText("GAME OVER", (int)(scaleX * 500), (int)(scaleY * 300), (int)(scaleY * 50), RED);
-    DrawText("Presiona ENTER para volver al menu", (int)(scaleX * 400), (int)(scaleY * 400), (int)(scaleY * 20), WHITE);
+    DrawText("Presiona ENTER para volver al menu", (int)(scaleX * 400), (int)(scaleY * 400), (int)(scaleY * 30), WHITE);
 }
 
 // --- MAIN FUNCTION ---
