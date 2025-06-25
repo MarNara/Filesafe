@@ -24,9 +24,11 @@ git commit -m "avance red"
 git push origin main
 ```
 ## Ingresar al juego en la terminal powershell:
+- Para compilar el código:
 ```bash
 ./compilador
 ```
+- Para ejecutar el juego:
 ```bash
 ./juego
 ```
