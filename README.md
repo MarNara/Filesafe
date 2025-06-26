@@ -24,7 +24,7 @@ pacman -S mingw-w64-x86_64-toolchain
 ```bash
 pacman -S mingw-w64-x86_64-raylib
 ```
-**Recomendación:** desde ahora siempre abre MSYS2 MinGW 64-bit(puedes buscarla en el buscador del windows).
+**Recomendación:** desde ahora siempre abre MSYS2 MinGW 64-bit (puedes buscarla en el buscador de tu ordenador).
 
 3. Para verificar que has instalado bien Raylib debes ejecutar los siguientes comandos en la terminal de MinGW64:
 ```bash
