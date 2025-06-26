@@ -26,17 +26,19 @@ pacman -S mingw-w64-x86_64-raylib
 ```
 **Recomendación:** desde ahora siempre abre MSYS2 MinGW 64-bit(puedes buscarla en el buscador del windows).
 
-4. Para verificar que has instalado bien Raylib debes ejecutar el siguiente comando en la terminal de MinGW64:
+4. Para verificar que has instalado bien Raylib debes ejecutar los siguientes comandos en la terminal de MinGW64:
 ```bash
 gcc --version
+```
+```bash
 pkg-config --libs raylib
 ```
-
 
 
 Ahora debes Ingresar al visual studio code. -Clonar en repositorio GitHub el link enviado al aula virtual:
 
 **-----------Para compilar y ejecutar el codigo--------------**
+
 Abre el archivo principal (por ejemplo, final2.c).
 
 Abre la terminal con ctrl + ñ.
