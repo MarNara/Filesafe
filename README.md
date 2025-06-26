@@ -2,7 +2,7 @@
 Descripción: El juego Filesafe se desarrolla en un mundo distópico en el que una inteligencia artificial controla a las personas mediante un chip insertado en sus cuellos. El jugador asume el rol de un agente encargado de liberar a las personas de este control mental y de formar un equipo que le permita escapar del lugar de forma segura. Para alcanzar este objetivo, el jugador debe seleccionar cuidadosamente los ítems necesarios para enfrentarse a cada personaje y hackear su chip. Si no logra hackearlo, perderá vida, y si su vida llega a cero, la partida finalizará.
 
 ## Cómo compilar y ejecutar la tarea:
-Consideraciones previas:
+**Consideraciones previas:**
 - Tener instalado Visual Studio Code.
 - Tener instalada la biblioteca Raylib.
 
@@ -18,12 +18,13 @@ Para instalar el MinGW-w64 de 64 bits.
 ```bash
 pacman -S mingw-w64-x86_64-toolchain
 ```
-*Acepta todo.
+**Acepta todo.**
+
 Para instalar el Raylib:
 ```bash
 pacman -S mingw-w64-x86_64-raylib
 ```
-*Recomendación: desde ahora siempre abre MSYS2 MinGW 64-bit(puedes buscarla en el buscador del windows).
+**Recomendación:** desde ahora siempre abre MSYS2 MinGW 64-bit(puedes buscarla en el buscador del windows).
 - Para verificar que has instalado bien Raylib debes ejecutar el siguiente comando en la terminal de MinGW64:
 ```bash
 gcc --version
@@ -32,9 +33,9 @@ pkg-config --libs raylib
 
 
 
--Ingresar al visual studio code. -Clonar en repositorio GitHub el link enviado al aula virtual:
+- Ingresar al visual studio code. -Clonar en repositorio GitHub el link enviado al aula virtual:
 
------------Para compilar y ejecutar el codigo--------------
+**-----------Para compilar y ejecutar el codigo--------------**
 Abre el archivo principal (por ejemplo, final2.c).
 
 Abre la terminal con ctrl + ñ.
