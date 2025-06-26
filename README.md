@@ -43,7 +43,7 @@ Abre el archivo principal (por ejemplo, final2.c).
 
 Abre la terminal con ctrl + ñ.
 
-En la terminal bash, compila el programa con el siguiente comando :
+
 ## Ingresar al juego en la terminal powershell:
 - Para compilar el código:
 ```bash
