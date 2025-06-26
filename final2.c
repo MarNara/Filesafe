@@ -18,7 +18,7 @@
 #define MENSAJE_DURACION 2.5f
 
 typedef struct {
-    char nombre[20];  // "Pocion", "Fruta", etc.
+    char nombre[20];  // "Pocion", "Botiquin", etc.
     int cantidad;     // cuántos tienes
     int curacion;     // cuánto cura ese item
 } Item;
@@ -201,6 +201,12 @@ void CargarMapa(const char* nombreArchivo, int*** mapaPtr, int* ancho, int* alto
                 jugador.spawn = jugador.posicion; // Guardar posición inicial (spawn)
                 (*mapaPtr)[y][x] = 0; // Set spawn point to empty tile
             }
+            if ((*mapaPtr)[y][x] == 4)
+            {
+            Sprite* botiquin = CrearSprite("sprites/botiquin.png", 1, 0.2f,
+                (Vector2){x * TILE_SIZE + TILE_SIZE / 2, y * TILE_SIZE + TILE_SIZE / 2});
+            list_pushBack(spritesActivos, botiquin);
+            }
         }
     }
     fclose(archivo);
@@ -232,11 +238,11 @@ void DibujarMapa(int** mapa, int ancho, int alto)
                 }
                 case 2: DrawRectangleRec(destino, RED); break;
                 case 3: DrawRectangleRec(destino, BLUE); break;
-                case 4: DrawRectangleRec(destino, DARKGRAY); break;
+                //case 4: DrawRectangleRec(destino, DARKGRAY); break;
                 case 5: DrawRectangleRec(destino, ORANGE); break;
-                case 6: DrawRectangleRec(destino, GREEN); break;
-                case 7: DrawRectangleRec(destino, PURPLE); break;
-                case 8: DrawRectangleRec(destino, GOLD); break;
+                case 6: DrawRectangleRec(destino, GREEN); break; // Electricidad
+                case 7: DrawRectangleRec(destino, PURPLE); break; // Sierra peligrosa
+                case 8: DrawRectangleRec(destino, GOLD); break; // Fuego
                 default: DrawRectangleRec(destino, BLACK); break;
             }
         }
@@ -381,14 +387,17 @@ void ActualizarGameplay()
     if(tileActual == 7) DrawText("¡Sierra peligrosa!", 10, 70, 20, RED);
     if(tileActual == 8) DrawText("¡Fuego!", 10, 70, 20, RED);
 
-    if (tileActual == 4) { // Fruta
-        AgregarItem(jugador.inventario, "Fruta", 10); // Cura 10
+    if (tileActual == 4) { // Botiquin
+        AgregarItem(jugador.inventario, "Botiquin", 10); // Cura 10
         mapa[tileY][tileX] = 0;
+        // Eliminar el sprite del botiquín de la lista
+        Vector2 posBotiquin = { tileX * TILE_SIZE + TILE_SIZE / 2, tileY * TILE_SIZE + TILE_SIZE / 2 };
+        EliminarSpritePorPosicion(spritesActivos, posBotiquin);
     }
 
     if (IsKeyPressed(KEY_F)) 
     { // Pulsar F para curarse
-        UsarItem(jugador.inventario, "Fruta", &jugador);
+        UsarItem(jugador.inventario, "Botiquin", &jugador);
     }
 
     if (IsKeyPressed(KEY_I))   
@@ -468,14 +477,15 @@ void DrawGameplay(float scaleX, float scaleY) {
             Sprite* s = (Sprite*)nodo->data;
             // Actualizar posición si es necesario
             ActualizarSprite(s, GetFrameTime());
-            DibujarSprite(s, s->position); // Usar la posición del sprite
+            DibujarSprite(s, s->position, false); // Usar la posición del sprite
             nodo = nodo->next;
         }
 
         // Dibujar sprite del jugador
         ActualizarSprite(jugador.spriteActual, GetFrameTime());
         DibujarSprite(jugador.spriteActual, 
-              (Vector2){jugador.posicion.x, jugador.posicion.y + jugador.offsetVisual.y});
+              (Vector2){jugador.posicion.x, jugador.posicion.y + jugador.offsetVisual.y}, true); 
+
 
         // Dibujar nombre del jugador
         DrawText(jugador.nombre,
@@ -504,7 +514,7 @@ void DrawGameplay(float scaleX, float scaleY) {
             Color color = BLANK;
 
             if (tile == 1 || tile == -1 || tile == -2) color = GRAY;     // plataformas y paredes
-            else if (tile == 4) color = GREEN;                           // fruta
+            else if (tile == 4) color = GREEN;                           // botiquín
             else if (tile == 6 || tile == 7 || tile == 8) color = RED;   // peligros
 
             if (color.a != 0) {
@@ -544,13 +554,18 @@ int main() {
     spritesActivos = list_create();
 
     Sprite* enemigo = CrearSprite("sprites/enemigo.png", 1, 0.15f, 
-        (Vector2){ 8 * TILE_SIZE + TILE_SIZE / 2, 6 * TILE_SIZE + TILE_SIZE / 2 });
+        (Vector2){8 * TILE_SIZE, 6 * TILE_SIZE});
+    enemigo->position.y -= enemigo->frameRec.height * (TILE_SIZE / enemigo->frameRec.width) - TILE_SIZE;
     list_pushBack(spritesActivos, enemigo);
 
     Sprite* fuego = CrearSprite("sprites/fuego.png", 1, 0.1f, 
-        (Vector2){ 10 * TILE_SIZE + TILE_SIZE / 2, 7 * TILE_SIZE + TILE_SIZE / 2 });
+        (Vector2){10 * TILE_SIZE, 7 * TILE_SIZE});
+    fuego->position.y -= fuego->frameRec.height * (TILE_SIZE / fuego->frameRec.width) - TILE_SIZE;
     list_pushBack(spritesActivos, fuego);
     
+    //Sprite* spriteBotiquin = CrearSprite("sprites/botiquin.png", 1, 0.2f, (Vector2){0, 0});
+    //list_pushBack(spritesActivos, spriteBotiquin);
+
     // Cargar imagen de menú
     Image image = LoadImage("base/Menu_incial.png");
     Texture2D Menu_inicial_imagen = LoadTextureFromImage(image);

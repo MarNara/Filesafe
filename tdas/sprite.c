@@ -1,4 +1,5 @@
 #include "sprite.h"
+#include "list.h"
 #include <stdlib.h>
 #include <math.h>
 #include "raylib.h"
@@ -32,28 +33,68 @@ void ActualizarSprite(Sprite* s, float deltaTime) {
     }
 }
 
-void DibujarSprite(Sprite* s, Vector2 posicion) {
+void DibujarSprite(Sprite* s, Vector2 posicion, bool esPersonaje) {
     float escala = TILE_SIZE / s->frameRec.width;
     
-    // Preparamos el rectángulo de origen considerando el flip
     Rectangle sourceRec = s->frameRec;
     if (s->flipX) {
-        sourceRec.width = -sourceRec.width; // Voltear horizontalmente
+        sourceRec.width = -sourceRec.width;
     }
-    
+
+    Rectangle destRec = {
+        posicion.x,
+        posicion.y,
+        fabs(sourceRec.width) * escala,
+        sourceRec.height * escala
+    };
+
+    // Comportamiento diferente para personaje vs otros sprites
+    if (!esPersonaje) {
+        // Ajuste para enemigos/fuego: alinear con el suelo
+        destRec.y += TILE_SIZE - destRec.height;
+    }
+
     DrawTexturePro(
         s->texture,
         sourceRec,
-        (Rectangle){
-            posicion.x,
-            posicion.y,
-            fabs(sourceRec.width) * escala, // Usamos valor absoluto
-            sourceRec.height * escala
-        },
+        destRec,
         (Vector2){0, 0},
         0.0f,
         WHITE
     );
+}
+
+void EliminarSpritePorPosicion(List* sprites, Vector2 pos) {
+    if (sprites == NULL || sprites->head == NULL) return;
+
+    Node* nodo = sprites->head;
+    Node* prev = NULL;
+    while (nodo) {
+        Sprite* s = (Sprite*)nodo->data;
+        float dx = fabsf(s->position.x - pos.x);
+        float dy = fabsf(s->position.y - pos.y);
+
+        // Tolerancia para considerar la misma posición (puedes ajustar este valor)
+        if (dx < 1.0f && dy < 1.0f) {
+            // Encontrado, eliminar nodo de la lista
+            if (prev == NULL) {
+                sprites->head = nodo->next;
+            } else {
+                prev->next = nodo->next;
+            }
+            if (nodo == sprites->tail) {
+                sprites->tail = prev;
+            }
+
+            LiberarSprite(s);
+            free(nodo);
+            sprites->size--;
+            return; // Eliminamos solo uno
+        }
+
+        prev = nodo;
+        nodo = nodo->next;
+    }
 }
 
 void LiberarSprite(Sprite* s) {
