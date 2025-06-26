@@ -6,26 +6,27 @@ Descripción: El juego Filesafe se desarrolla en un mundo distópico en el que u
 - Tener instalado Visual Studio Code.
 - Tener instalada la biblioteca Raylib.
 
-En caso de no tener la biblioteca Raylib aqui te mostramos como instalarla:
-- Debes instalar MSYS2 MinGw W64. Puede hacerlo ingresando a la siguiente página: https://www.msys2.org/
+**En caso de no tener la biblioteca Raylib aqui te mostramos los pasos de como instalarla:**
+1.  Debes instalar MSYS2 MinGw W64. Puede hacerlo ingresando a la siguiente página: https://www.msys2.org/
 Descarga e instala MSYS2 para Windows.
 
-- Ahora debes ingresar a la terminal de MSYS2 MinGw W64 y escribir el siguiente comando:
+2.  Ahora debes ingresar a la terminal de MSYS2 MinGw W64 y escribir el siguiente comando:
 ```bash
 pacman -Syu
 ```
-Para instalar el MinGW-w64 de 64 bits.
+- Para instalar el MinGW-w64 de 64 bits.
 ```bash
 pacman -S mingw-w64-x86_64-toolchain
 ```
-**Acepta todo.**
+*Acepta todo.
 
-Para instalar el Raylib:
+- Para instalar el Raylib ejecuta el:
 ```bash
 pacman -S mingw-w64-x86_64-raylib
 ```
 **Recomendación:** desde ahora siempre abre MSYS2 MinGW 64-bit(puedes buscarla en el buscador del windows).
-- Para verificar que has instalado bien Raylib debes ejecutar el siguiente comando en la terminal de MinGW64:
+
+4. Para verificar que has instalado bien Raylib debes ejecutar el siguiente comando en la terminal de MinGW64:
 ```bash
 gcc --version
 pkg-config --libs raylib
@@ -33,7 +34,7 @@ pkg-config --libs raylib
 
 
 
-- Ingresar al visual studio code. -Clonar en repositorio GitHub el link enviado al aula virtual:
+Ahora debes Ingresar al visual studio code. -Clonar en repositorio GitHub el link enviado al aula virtual:
 
 **-----------Para compilar y ejecutar el codigo--------------**
 Abre el archivo principal (por ejemplo, final2.c).
@@ -41,7 +42,15 @@ Abre el archivo principal (por ejemplo, final2.c).
 Abre la terminal con ctrl + ñ.
 
 En la terminal bash, compila el programa con el siguiente comando :
-
+## Ingresar al juego en la terminal powershell:
+- Para compilar el código:
+```bash
+./compilador
+```
+- Para ejecutar el juego:
+```bash
+./juego
+```
 ## Para agregar el avance de solo un archivo: 
 - En la terminal bash ingresa los siguientes comandos:
 ```bash
@@ -53,12 +62,4 @@ git commit -m "avance"
 ```bash
 git push origin main
 ```
-## Ingresar al juego en la terminal powershell:
-- Para compilar el código:
-```bash
-./compilador
-```
-- Para ejecutar el juego:
-```bash
-./juego
-```
+
