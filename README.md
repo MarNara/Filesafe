@@ -69,3 +69,7 @@ git push origin main
 ```bash
 git pull origin main
 ```
+
+## Ejemplos que muestran cómo interactuar con la aplicación.
+
+![Inicio del juego](Ejemplos_Uso/ejemplo_inicio.png)
