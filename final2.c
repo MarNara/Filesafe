@@ -529,6 +529,21 @@ void DrawGameplay(float scaleX, float scaleY) {
     }
 }
 
+void personaje_sprites_main(Personaje* jugador)
+{
+    // Inicializar el jugador usando la función de la biblioteca
+    
+    (*jugador).spriteIdleStart = CrearSprite("sprites/prota_idle_start.png", 1, 0.2f, (*jugador).posicion);
+    (*jugador).spriteIdleWalk = CrearSprite("sprites/prota_idle_walk.png", 2, 0.2f, (*jugador).posicion);
+    (*jugador).spriteJumpUp = CrearSprite("sprites/prota_jump_up.png", 1, 0.1f, (*jugador).posicion);
+    (*jugador).spriteJumpDown = CrearSprite("sprites/prota_jump_down.png", 1, 0.1f, (*jugador).posicion);
+    (*jugador).spriteClimb = CrearSprite("sprites/prota_climb.png", 1, 0.2f, (*jugador).posicion);
+    (*jugador).spriteRun  = CrearSprite("sprites/prota_run.png", 1, 0.12f, (*jugador).posicion);
+    (*jugador).spriteActual = (*jugador).spriteIdleStart;
+
+}
+
+
 void DrawGameOver(float scaleX, float scaleY) {
     DrawText("GAME OVER", (int)(scaleX * 500), (int)(scaleY * 300), (int)(scaleY * 50), RED);
     DrawText("Presiona ENTER para volver al menu", (int)(scaleX * 400), (int)(scaleY * 400), (int)(scaleY * 30), WHITE);
@@ -543,12 +558,11 @@ int main() {
 
     spritesActivos = list_create();
 
-    Sprite* enemigo = CrearSprite("sprites/enemigo.png", 1, 0.15f, 
-        (Vector2){ 8 * TILE_SIZE + TILE_SIZE / 2, 6 * TILE_SIZE + TILE_SIZE / 2 });
+    Sprite* enemigo = CrearSprite("sprites/enemigo.png", 1, 0.15f, (Vector2){ 8 * TILE_SIZE + TILE_SIZE / 2, 6 * TILE_SIZE + TILE_SIZE / 2 });
     list_pushBack(spritesActivos, enemigo);
 
     Sprite* fuego = CrearSprite("sprites/fuego.png", 1, 0.1f, 
-        (Vector2){ 10 * TILE_SIZE + TILE_SIZE / 2, 7 * TILE_SIZE + TILE_SIZE / 2 });
+        (Vector2){ 10 * TILE_SIZE + TILE_SIZE, 7 * TILE_SIZE + TILE_SIZE});
     list_pushBack(spritesActivos, fuego);
     
     // Cargar imagen de menú
@@ -580,19 +594,13 @@ int main() {
     ConectarMapas(mapa3, mapa2, 3);
 
     mapaActual = mapa1;
+
+    
     InicializarPersonaje(&jugador);
 
     CargarMapa(mapaActual->archivoMapa, &mapa, &mapaActual->ancho, &mapaActual->alto);
-
-    // Inicializar el jugador usando la función de la biblioteca
     
-    jugador.spriteIdleStart = CrearSprite("sprites/prota_idle_start.png", 1, 0.2f, jugador.posicion);
-    jugador.spriteIdleWalk = CrearSprite("sprites/prota_idle_walk.png", 2, 0.2f, jugador.posicion);
-    jugador.spriteJumpUp = CrearSprite("sprites/prota_jump_up.png", 1, 0.1f, jugador.posicion);
-    jugador.spriteJumpDown = CrearSprite("sprites/prota_jump_down.png", 1, 0.1f, jugador.posicion);
-    jugador.spriteClimb = CrearSprite("sprites/prota_climb.png", 1, 0.2f, jugador.posicion);
-    jugador.spriteRun  = CrearSprite("sprites/prota_run.png", 1, 0.12f, jugador.posicion);
-    jugador.spriteActual = jugador.spriteIdleStart;
+    personaje_sprites_main(&jugador);
 
     // Lista para llevar un registro de todos los nodos del grafo
     NodoMapa* todosLosMapas[] = {mapa1, mapa2, mapa3};
