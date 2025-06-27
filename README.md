@@ -72,4 +72,18 @@ git pull origin main
 
 ## Ejemplos que muestran cómo interactuar con la aplicación.
 
+**------------------------------------------Ejemplo de iniciar el juego------------------------------------------**
 ![Inicio del juego](Ejemplos_Uso/ejemplo_inicio.png)
+Al ingresar a iniciar juego se dirije a la pantalla donde debe ingresar su nombre.
+
+**------------------------------------------Ejemplo de Escribir nombre------------------------------------------**
+![Inicio del juego](Ejemplos_Uso/ejemplo_nombre.png)
+Luego de ingresar el nombre y presionar enter, el juego comienza.
+
+Ingreso al juego:
+![Inicio del juego](Ejemplos_Uso/ejemplo_inicioJuego.png)
+
+**------------------------------------------Ejemplo de Game Over------------------------------------------**
+
+![Inicio del juego](Ejemplos_Uso/ejemplo_gameOver.png)
+Al presionar enter este vuelve a la pantalla de inicio.
