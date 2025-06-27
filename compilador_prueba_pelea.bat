@@ -1,0 +1,1 @@
+gcc -o pelea prueba_pelea.c tdas/hashmap.c -lraylib -lm
