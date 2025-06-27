@@ -49,6 +49,10 @@ void enemigoAtaca(Combatiente *enemigo, Combatiente *jugador) {
 int main() {
     InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "Combate");
 
+    Texture2D texFondo = LoadTexture("sprites/personaje/escenario_de_combate.png");
+    Texture2D texPersonaje = LoadTexture("sprites/personaje/combate de lado.png");
+    Texture2D texEnemigo = LoadTexture("sprites/enemigo_pelea.png");
+
     HashMap *inventario = createMap(10);
     if (inventario == NULL) {
         perror("Fallo al crear el HashMap");
@@ -76,12 +80,16 @@ int main() {
 
     bool turnoJugador = true;
 
-    // Animación de colisión más larga
     bool animandoAtaque = false;
     bool animandoJugador = false;
     int animFrame = 0;
     float animOffsetPlayerX = 0;
     float animOffsetEnemyX = 0;
+
+    const float ANCHO_JUGADOR = 90.0f;
+    const float ALTO_JUGADOR = 150.0f;
+    const float ANCHO_ENEMIGO = 150.0f;
+    const float ALTO_ENEMIGO = 150.0f;
 
     while (!WindowShouldClose() && !IsKeyPressed(KEY_Q)) {
         int width = GetScreenWidth();
@@ -90,11 +98,10 @@ int main() {
         float scaleY = (float)height / SCREEN_HEIGHT;
         cam.zoom = (scaleX < scaleY) ? scaleX : scaleY;
 
-        // Animación de ataque extendida
         if (animandoAtaque) {
             animFrame++;
-            float avance = 3.0f; // avance por frame más suave
-            int duracionTotal = 20; // duración total 20 frames
+            float avance = 3.0f;
+            int duracionTotal = 20;
 
             if (animFrame <= duracionTotal / 2) {
                 if (animandoJugador)
@@ -193,11 +200,33 @@ int main() {
         }
 
         BeginDrawing();
-        ClearBackground(RAYWHITE);
+        DrawTexturePro(
+            texFondo,
+            (Rectangle){0, 0, texFondo.width, texFondo.height},
+            (Rectangle){0, 0, (float)GetScreenWidth(), (float)GetScreenHeight()},
+            (Vector2){0, 0},
+            0.0f,
+            WHITE
+        );
+
         BeginMode2D(cam);
 
-        DrawRectangle(100 + animOffsetPlayerX, 250, 100, 100, BLUE);
-        DrawRectangle(600 + animOffsetEnemyX, 250, 100, 100, RED);
+        Rectangle rectJugador = {100 + animOffsetPlayerX, 220, ANCHO_JUGADOR, ALTO_JUGADOR};
+        Rectangle rectEnemigo = {600 + animOffsetEnemyX, 220, ANCHO_ENEMIGO, ALTO_ENEMIGO};
+
+        DrawTexturePro(texPersonaje,
+                       (Rectangle){0, 0, texPersonaje.width, texPersonaje.height},
+                       rectJugador,
+                       (Vector2){0, 0},
+                       0.0f,
+                       WHITE);
+
+        DrawTexturePro(texEnemigo,
+                       (Rectangle){0, 0, texEnemigo.width, texEnemigo.height},
+                       rectEnemigo,
+                       (Vector2){0, 0},
+                       0.0f,
+                       WHITE);
 
         DrawText(TextFormat("Player - Vida: %d", player.vida), 100, 100, 20, BLUE);
         DrawText(TextFormat("Robot - Vida: %d", enemy.vida), 500, 100, 20, RED);
@@ -226,11 +255,11 @@ int main() {
 
         if (!batallaActiva) {
             if (player.vida <= 0)
-                DrawText("¡Has perdido!", 300, 300, 30, RED);
+                DrawText("Has perdido!", 300, 300, 30, RED);
             else if (enemy.vida <= 0)
-                DrawText("¡Has ganado!", 300, 300, 30, GREEN);
+                DrawText("Has ganado!", 300, 300, 30, GREEN);
             else if (enemigoLiberado)
-                DrawText("¡Has liberado a esta persona!", 225, 300, 25, DARKGREEN);
+                DrawText("Liberaste al robot!", 250, 300, 25, DARKGREEN);
 
             DrawText("Presiona Q para salir...", 250, 400, 20, DARKGRAY);
         }
@@ -239,6 +268,9 @@ int main() {
         EndDrawing();
     }
 
+    UnloadTexture(texFondo);
+    UnloadTexture(texPersonaje);
+    UnloadTexture(texEnemigo);
     CloseWindow();
     return 0;
 }
