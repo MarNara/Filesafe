@@ -530,12 +530,12 @@ void personaje_sprites_main(Personaje* jugador)
 {
     // Inicializar el jugador usando la función de la biblioteca
     
-    (*jugador).spriteIdleStart = CrearSprite("sprites/prota_idle_start.png", 1, 0.2f, (*jugador).posicion);
-    (*jugador).spriteIdleWalk = CrearSprite("sprites/prota_idle_walk.png", 2, 0.2f, (*jugador).posicion);
-    (*jugador).spriteJumpUp = CrearSprite("sprites/prota_jump_up.png", 1, 0.1f, (*jugador).posicion);
-    (*jugador).spriteJumpDown = CrearSprite("sprites/prota_jump_down.png", 1, 0.1f, (*jugador).posicion);
-    (*jugador).spriteClimb = CrearSprite("sprites/prota_climb.png", 1, 0.2f, (*jugador).posicion);
-    (*jugador).spriteRun  = CrearSprite("sprites/prota_run.png", 1, 0.12f, (*jugador).posicion);
+    (*jugador).spriteIdleStart = CrearSprite("sprites/personaje/prota_idle_start.png", 1, 0.2f, (*jugador).posicion);
+    (*jugador).spriteIdleWalk = CrearSprite("sprites/personaje/prota_idle_walk.png", 2, 0.2f, (*jugador).posicion);
+    (*jugador).spriteJumpUp = CrearSprite("sprites/personaje/prota_jump_up.png", 1, 0.1f, (*jugador).posicion);
+    (*jugador).spriteJumpDown = CrearSprite("sprites/personaje/prota_jump_down.png", 1, 0.1f, (*jugador).posicion);
+    (*jugador).spriteClimb = CrearSprite("sprites/personaje/prota_climb.png", 1, 0.2f, (*jugador).posicion);
+    (*jugador).spriteRun  = CrearSprite("sprites/personaje/prota_run.png", 1, 0.12f, (*jugador).posicion);
     (*jugador).spriteActual = (*jugador).spriteIdleStart;
 
 }
@@ -557,10 +557,10 @@ void sprites_mundo()
     list_pushBack(spritesActivos, fuego);
 
     
-    texturasMapa[0] = LoadTexture("sprites/pared.JPG");        // para tile 0
-    texturasMapa[1] = LoadTexture("sprites/suelo.jpeg");        // para tile 1
-    texturasMapa[2] = LoadTexture("sprites/pared_izq.jpeg");    // para tile -1
-    texturasMapa[3] = LoadTexture("sprites/pared_der.jpeg");    // para tile -2
+    texturasMapa[0] = LoadTexture("sprites/Bloques/pared_morada_ladrillo/pared.JPG");        // para tile 0
+    texturasMapa[1] = LoadTexture("sprites/Bloques/suelo.jpeg");        // para tile 1
+    texturasMapa[2] = LoadTexture("sprites/Bloques/pared_morada_ladrillo/pared_izq.jpeg");    // para tile -1
+    texturasMapa[3] = LoadTexture("sprites/Bloques/pared_morada_ladrillo/pared_der.jpeg");    // para tile -2
 
     
 }
@@ -574,7 +574,7 @@ int main() {
     sprites_mundo();
 
     // Cargar imagen de menú
-    Image image = LoadImage("base/Menu_incial.png");
+    Image image = LoadImage("Menus/Menu_incial.png");
     Texture2D Menu_inicial_imagen = LoadTextureFromImage(image);
     UnloadImage(image);
 
