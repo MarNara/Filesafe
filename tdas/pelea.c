@@ -1,6 +1,6 @@
 #include "raylib.h"
-#include "tdas/hashmap.h"
-#include "tdas/pelea.h"
+#include "hashmap.h"
+#include "pelea.h"
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
