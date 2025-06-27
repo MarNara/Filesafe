@@ -128,7 +128,6 @@ Pair* ObtenerItemEnPosicion(HashMap* inventario, int pos) {
     return NULL;
 }
 
-
 void LimpiarInventario(HashMap* inventario) {
     if (!inventario) return;
 
@@ -146,7 +145,6 @@ void LimpiarInventario(HashMap* inventario) {
         par = firstMap(inventario);
     }
 }
-
 
 // --- FUNCIONES AUXILIARES ---
 
@@ -181,7 +179,6 @@ void CargarMapa(const char* nombreArchivo, int*** mapaPtr, int* ancho, int* alto
     {
         (*mapaPtr)[y] = (int*)malloc((*ancho) * sizeof(int));
     }
-    int spawnFound = 0;
     for (int y = 0; y < *alto; y++)
     {
         for (int x = 0; x < *ancho; x++)
@@ -200,15 +197,10 @@ void CargarMapa(const char* nombreArchivo, int*** mapaPtr, int* ancho, int* alto
                 (*jugador).posicion = (Vector2){ (float) x * TILE_SIZE, (float) y * TILE_SIZE };
                 (*jugador).spawn = (*jugador).posicion; // Guardar posición inicial (spawn)
                 (*mapaPtr)[y][x] = 0; // Set spawn point to empty tile
-                spawnFound = 1;
             }
         }
     }
-    if (!spawnFound) 
-    {
-        (*jugador).posicion = (Vector2){1 * TILE_SIZE, 1 * TILE_SIZE};
-        (*jugador).spawn = (*jugador).posicion;
-    }
+
     fclose(archivo);
 }
 
@@ -324,7 +316,6 @@ void ActualizarInventario() {
     }
 }
 
-
 // --- LÓGICA DE JUEGO ---
 void ActualizarGameplay()
 {
@@ -381,7 +372,7 @@ void ActualizarGameplay()
     int tileActual = mapa[tileY][tileX];
 
     if(tileActual == 6 || tileActual == 7 || tileActual == 8) {
-        jugador.vida -= 1; // o cualquier daño que estimes
+        jugador.vida -= 2; // o cualquier daño que estimes
     }
     if(tileActual == 6) DrawText("¡Electricidad!", 10, 70, 20, RED);
     if(tileActual == 7) DrawText("¡Sierra peligrosa!", 10, 70, 20, RED);
@@ -549,19 +540,13 @@ void personaje_sprites_main(Personaje* jugador)
 
 }
 
-
 void DrawGameOver(float scaleX, float scaleY) {
     DrawText("GAME OVER", (int)(scaleX * 500), (int)(scaleY * 300), (int)(scaleY * 50), RED);
     DrawText("Presiona ENTER para volver al menu", (int)(scaleX * 400), (int)(scaleY * 400), (int)(scaleY * 30), WHITE);
 }
 
-// --- MAIN FUNCTION ---
-int main() {
-    SetConfigFlags(FLAG_WINDOW_RESIZABLE);
-    InitWindow(BASE_ANCHO, BASE_ALTO, "FILESAFE");
-    //MaximizeWindow();
-    SetTargetFPS(60);
-
+void sprites_mundo()
+{
     spritesActivos = list_create();
 
     Sprite* enemigo = CrearSprite("sprites/enemigo.png", 1, 0.15f, (Vector2){ 8 * TILE_SIZE + TILE_SIZE / 2, 6 * TILE_SIZE + TILE_SIZE / 2 });
@@ -570,16 +555,28 @@ int main() {
     Sprite* fuego = CrearSprite("sprites/fuego.png", 1, 0.1f, 
         (Vector2){ 10 * TILE_SIZE + TILE_SIZE, 7 * TILE_SIZE + TILE_SIZE});
     list_pushBack(spritesActivos, fuego);
-    
-    // Cargar imagen de menú
-    Image image = LoadImage("base/Menu_incial.png");
-    Texture2D Menu_inicial_imagen = LoadTextureFromImage(image);
-    UnloadImage(image);
 
+    
     texturasMapa[0] = LoadTexture("sprites/pared.JPG");        // para tile 0
     texturasMapa[1] = LoadTexture("sprites/suelo.jpeg");        // para tile 1
     texturasMapa[2] = LoadTexture("sprites/pared_izq.jpeg");    // para tile -1
     texturasMapa[3] = LoadTexture("sprites/pared_der.jpeg");    // para tile -2
+
+    
+}
+// --- MAIN FUNCTION ---
+int main() {
+    SetConfigFlags(FLAG_WINDOW_RESIZABLE);
+    InitWindow(BASE_ANCHO, BASE_ALTO, "FILESAFE");
+    //MaximizeWindow();
+    SetTargetFPS(60);
+
+    sprites_mundo();
+
+    // Cargar imagen de menú
+    Image image = LoadImage("base/Menu_incial.png");
+    Texture2D Menu_inicial_imagen = LoadTextureFromImage(image);
+    UnloadImage(image);
 
     // Inicializar la cámara
     camara.target = jugador.posicion;
