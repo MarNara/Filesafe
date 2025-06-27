@@ -43,6 +43,10 @@ NodoMapa* mapaInicial = NULL;
 char mensajePantalla[256] = "";
 float tiempoMensaje = 0.0f;
 
+NodoMapa** todosLosMapas = NULL; // Array de todos los mapas
+int cantidadMapas = 0; // Total de mapas cargados
+HashMap* frutasRecolectadas = NULL;
+
 
 GameScreen pantallaDeJuego = MENU;
 int opcionSelecionada = 0;
@@ -128,6 +132,20 @@ Pair* ObtenerItemEnPosicion(HashMap* inventario, int pos) {
     return NULL;
 }
 
+void freeList(void *value) {
+    if (value == NULL) return;
+    
+    List *list = (List*)value;
+    Node *current = list->head;
+    while (current != NULL) {
+        Node *next = current->next;
+        free(current->data);  // Liberar Vector2*
+        free(current);        // Liberar nodo
+        current = next;
+    }
+    free(list);  // Liberar estructura List
+}
+
 void LimpiarInventario(HashMap* inventario) {
     if (!inventario) return;
 
@@ -198,8 +216,19 @@ void CargarMapa(const char* nombreArchivo, int*** mapaPtr, int* ancho, int* alto
                 (*jugador).spawn = (*jugador).posicion; // Guardar posición inicial (spawn)
                 (*mapaPtr)[y][x] = 0; // Set spawn point to empty tile
             }
+            Pair* frutasMapa = searchMap(frutasRecolectadas, (char*)nombreArchivo);
+            if (frutasMapa) {
+                List* posiciones = (List*)frutasMapa->value;
+                Node* current = posiciones->head;
+                while (current) {
+                    Vector2* pos = (Vector2*)current->data;
+                    (*mapaPtr)[(int)pos->y][(int)pos->x] = 0;  // Eliminar fruta
+                    current = current->next;
+                }
+            }
         }
     }
+    
 
     fclose(archivo);
 }
@@ -379,7 +408,23 @@ void ActualizarGameplay()
     if(tileActual == 8) DrawText("¡Fuego!", 10, 70, 20, RED);
 
     if (tileActual == 4) { // Fruta
-        AgregarItem(jugador.inventario, "Fruta", 10); // Cura 10
+        // Registrar posición recolectada
+        Vector2* posFruta = malloc(sizeof(Vector2));
+        posFruta->x = tileX;
+        posFruta->y = tileY;
+        
+        Pair* par = searchMap(frutasRecolectadas, (char*)mapaActual->archivoMapa);
+        if (!par) {
+            List* lista = list_create();
+            list_pushBack(lista, posFruta);
+            insertMap(frutasRecolectadas, strdup(mapaActual->archivoMapa), lista);
+        } else {
+            List* lista = (List*)par->value;
+            list_pushBack(lista, posFruta);
+        }
+        
+        // Recolectar fruta
+        AgregarItem(jugador.inventario, "Fruta", 10);
         mapa[tileY][tileX] = 0;
     }
 
@@ -398,14 +443,46 @@ void ActualizarGameplay()
 
 void ActualizarGameOver() {
     if (IsKeyPressed(KEY_ENTER)) {
-        pantallaDeJuego = MENU; // Vuelve al menú
-        jugador.vida = 100; // Vida máxima
-        jugador.posicion = jugador.spawn; // Volver al punto de inicio
-        // Limpiar inventario si quieres:
+        pantallaDeJuego = MENU;
+        jugador.vida = 100;
+        
+        // Volver al mapa inicial
         mapaActual = mapaInicial;  
-        LimpiarInventario(jugador.inventario);         // Volver a cargar el mapa actual:
+        
+        // Limpiar inventario
+        LimpiarInventario(jugador.inventario);
         jugador.inventario = createMap(100);
+        
+        // Reiniciar grafos
+        for (int i = 0; i < cantidadMapas; i++) {
+            // Liberar memoria existente
+            free(todosLosMapas[i]->archivoMapa);
+            free(todosLosMapas[i]);
+            
+            // Recrear cada mapa
+            if (i == 0) todosLosMapas[i] = CrearMapa(1, "mapas/mapa1.csv");
+            else if (i == 1) todosLosMapas[i] = CrearMapa(2, "mapas/mapa2.csv");
+            else todosLosMapas[i] = CrearMapa(3, "mapas/mapa3.csv");
+        }
+        
+        // Reconectar mapas
+        ConectarMapas(todosLosMapas[0], todosLosMapas[1], 2);
+        ConectarMapas(todosLosMapas[1], todosLosMapas[0], 3);
+        ConectarMapas(todosLosMapas[1], todosLosMapas[2], 2);
+        ConectarMapas(todosLosMapas[2], todosLosMapas[1], 3);
+        
+        // Actualizar mapaInicial
+        mapaInicial = todosLosMapas[0];
+        mapaActual = mapaInicial;
+        
+        // Recargar mapa inicial
         CargarMapa(mapaActual->archivoMapa, &mapa, &mapaActual->ancho, &mapaActual->alto, &jugador);
+        
+        // Limpiar frutas recolectadas usando cleanMap
+        if (frutasRecolectadas != NULL) {
+            cleanMap(frutasRecolectadas, freeList);
+        }
+        frutasRecolectadas = createMap(100);  // Reiniciar
     }
 }
 
@@ -578,6 +655,8 @@ int main() {
     Texture2D Menu_inicial_imagen = LoadTextureFromImage(image);
     UnloadImage(image);
 
+    frutasRecolectadas = createMap(10);
+
     // Inicializar la cámara
     camara.target = jugador.posicion;
     camara.offset = (Vector2){ BASE_ANCHO / 2.0f, BASE_ALTO / 2.0f };
@@ -585,18 +664,22 @@ int main() {
     camara.zoom = 1.0f;
 
     // Crear el grafo de mapas
-    NodoMapa* mapa1 = CrearMapa(1, "mapas/mapa1.csv");
-    NodoMapa* mapa2 = CrearMapa(2, "mapas/mapa2.csv");
-    NodoMapa* mapa3 = CrearMapa(3, "mapas/mapa3.csv");
-
-    mapaInicial = mapa1;
+    cantidadMapas = 3;
+    todosLosMapas = malloc(sizeof(NodoMapa*) * cantidadMapas);
+    
+    todosLosMapas[0] = CrearMapa(1, "mapas/mapa1.csv");
+    todosLosMapas[1] = CrearMapa(2, "mapas/mapa2.csv");
+    todosLosMapas[2] = CrearMapa(3, "mapas/mapa3.csv");
+    
+    mapaInicial = todosLosMapas[0];
+    
     // Conectar mapas
-    ConectarMapas(mapa1, mapa2, 2);
-    ConectarMapas(mapa2, mapa1, 3);
-    ConectarMapas(mapa2, mapa3, 2);
-    ConectarMapas(mapa3, mapa2, 3);
-
-    mapaActual = mapa1;
+    ConectarMapas(todosLosMapas[0], todosLosMapas[1], 2);
+    ConectarMapas(todosLosMapas[1], todosLosMapas[0], 3);
+    ConectarMapas(todosLosMapas[1], todosLosMapas[2], 2);
+    ConectarMapas(todosLosMapas[2], todosLosMapas[1], 3);
+    
+    mapaActual = mapaInicial;
 
     
     InicializarPersonaje(&jugador);
@@ -606,8 +689,6 @@ int main() {
     
 
     // Lista para llevar un registro de todos los nodos del grafo
-    NodoMapa* todosLosMapas[] = {mapa1, mapa2, mapa3};
-    int cantidadMapas = 3;
 
     while (!WindowShouldClose()) {
         int pantalla_ancho = GetScreenWidth();
@@ -665,11 +746,19 @@ int main() {
     }
     
     // Liberar nodos del grafo
-    for (int i = 0; i < cantidadMapas; i++) {
-        free(todosLosMapas[i]->archivoMapa);
+// Al final de main(), antes de CloseWindow()
+    if (todosLosMapas) {
+        for (int i = 0; i < cantidadMapas; i++) {
+            free(todosLosMapas[i]->archivoMapa);
+            free(todosLosMapas[i]);
+        }
+        free(todosLosMapas);
     }
-    LiberarGrafo(todosLosMapas, cantidadMapas);
-
+    
+    if (frutasRecolectadas) {
+        cleanMap(frutasRecolectadas, freeList);
+    }
+    
     Node* nodo = spritesActivos->head;
     while (nodo) {
         LiberarSprite((Sprite*)nodo->data);

@@ -168,3 +168,32 @@ Pair * nextMap(HashMap * map) {
     }
     return NULL;
 }
+
+void cleanMap(HashMap *map, void (*freeValue)(void*)) {
+    if (map == NULL) return;
+
+    // Recorrer todos los buckets
+    for (long i = 0; i < map->capacity; i++) {
+        Pair *current = map->buckets[i];
+        if (current != NULL) {
+            // Liberar la clave
+            if (current->key != NULL) {
+                free(current->key);
+            }
+            
+            // Liberar el valor usando la función proporcionada
+            if (freeValue != NULL && current->value != NULL) {
+                freeValue(current->value);
+            }
+            
+            // Liberar el par
+            free(current);
+        }
+    }
+    
+    // Liberar el array de buckets
+    free(map->buckets);
+    
+    // Liberar la estructura del mapa
+    free(map);
+}

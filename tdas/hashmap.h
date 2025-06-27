@@ -31,4 +31,6 @@ Pair * nextMap(HashMap * table);
 
 void enlarge(HashMap * map);
 
+void cleanMap(HashMap *map, void (*freeValue)(void*));
+
 #endif /* HashMap_h */
