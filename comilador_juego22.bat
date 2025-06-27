@@ -1,1 +1,0 @@
-gcc juego_prueba.c tdas/prueba_pelea.c tdas/sprite.c tdas/hashmap.c tdas/movimiento.c tdas/grafo.c tdas/list.c tdas/extra.c -I. -o juego_prueba.exe -lraylib -lm

@@ -357,14 +357,14 @@ void ActualizarGameplay()
     Combatiente jugadorX = {"Player", 50, true};
     Combatiente enemigoY = {"Robot", 50, false};
     ///-------------------------------------------------------------------enemigo--------------------------------------------------------------------------------------
-    // Revisa un área 3x3 alrededor del jugador para detectar enemigos (tiles con valor 4 o 6)
+    // Revisa un área 3x3 alrededor del jugador para detectar enemigos 
     for (int dy = -1; dy <= 1; dy++) {
         for (int dx = -1; dx <= 1; dx++) {
             int x = tileX + dx;
             int y = tileY + dy;
             if (x >= 0 && x < mapaActual->ancho && y >= 0 && y < mapaActual->alto) {
                 int tile = mapa[y][x];
-                if (tile == 6) {
+                if (tile == 6) {// encuentro con enemigo
                     enemigoCercano = true;
                     break;
                 }
