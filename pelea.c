@@ -230,7 +230,7 @@ int main() {
             else if (enemy.vida <= 0)
                 DrawText("¡Has ganado!", 300, 300, 30, GREEN);
             else if (enemigoLiberado)
-                DrawText("¡Has liberado a esta persona!", 250, 300, 25, DARKGREEN);
+                DrawText("¡Has liberado a esta persona!", 225, 300, 25, DARKGREEN);
 
             DrawText("Presiona Q para salir...", 250, 400, 20, DARKGRAY);
         }
