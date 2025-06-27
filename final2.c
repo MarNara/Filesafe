@@ -5,6 +5,7 @@
 #include "tdas/movimiento.h"  // Incluimos la biblioteca de movimiento
 #include "tdas/hashmap.h"
 #include "tdas/sprite.h"
+#include "tdas/pelea.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -14,7 +15,7 @@
 // --- CONSTANTES DEL JUEGO ---
 #define TILE_SIZE 64.0f
 #define BASE_ANCHO 1280
-#define BASE_ALTO 1024
+#define BASE_ALTO 900
 #define MENSAJE_DURACION 2.5f
 
 typedef struct {
@@ -350,6 +351,33 @@ void ActualizarGameplay()
 {
     int tileX = (int)(jugador.posicion.x / TILE_SIZE);
     int tileY = (int)(jugador.posicion.y / TILE_SIZE);
+
+    bool enemigoCercano = false;
+
+    Combatiente jugadorX = {"Player", 50, true};
+    Combatiente enemigoY = {"Robot", 50, false};
+    ///-------------------------------------------------------------------enemigo--------------------------------------------------------------------------------------
+    // Revisa un área 3x3 alrededor del jugador para detectar enemigos (tiles con valor 4 o 6)
+    for (int dy = -1; dy <= 1; dy++) {
+        for (int dx = -1; dx <= 1; dx++) {
+            int x = tileX + dx;
+            int y = tileY + dy;
+            if (x >= 0 && x < mapaActual->ancho && y >= 0 && y < mapaActual->alto) {
+                int tile = mapa[y][x];
+                if (tile == 6) {
+                    enemigoCercano = true;
+                    break;
+                }
+            }
+        }
+        if (enemigoCercano) break;
+    }
+
+    if (enemigoCercano) {
+        pantallaDeJuego = COMBATE;    // Cambia la pantalla a combate
+        iniciar_pelea(&jugadorX, &enemigoY);              // Llama a la función de pelea que creaste
+        return;                      // Salimos de la función para evitar seguir actualizando el gameplay
+    }
 
     float delta = GetFrameTime();
     if (tiempoMensaje > 0.0f) 
