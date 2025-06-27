@@ -3,10 +3,12 @@
 #include <stdlib.h>
 #include <math.h>
 #include "raylib.h"
+
 #define TILE_SIZE 64.0f
 
-Sprite* CrearSprite(const char* ruta, int frameCount, float frameTime, Vector2 pos) {
+Sprite* CrearSprite(const char* ruta, int frameCount, float frameTime, Vector2 pos, SpriteTipo tipo) {
     Sprite* s = malloc(sizeof(Sprite));
+    if (!s) return NULL;
 
     // Cargar imagen con canal alfa asegurado
     Image img = LoadImage(ruta);
@@ -19,20 +21,32 @@ Sprite* CrearSprite(const char* ruta, int frameCount, float frameTime, Vector2 p
     s->currentFrame = 0;
     s->timeCounter = 0.0f;
     s->position = pos;
-    s->flipX = false; // Por defecto sin flip
-    s->frameRec = (Rectangle){0, 0, (float)s->texture.width / frameCount, (float)s->texture.height};
+    s->flipX = false;
+    s->tipo = tipo;
+
+    s->frameRec = (Rectangle){
+        0,
+        0,
+        (float)s->texture.width / frameCount,
+        (float)s->texture.height
+    };
+
     return s;
 }
 
 void ActualizarSprite(Sprite* s, float deltaTime) {
-    s->timeCounter += deltaTime;
-    if (s->timeCounter >= s->frameTime) {
-        s->currentFrame = (s->currentFrame + 1) % s->frameCount;
-        s->frameRec.x = s->currentFrame * s->frameRec.width;
-        s->timeCounter = 0.0f;
+    // Solo actualizar si hay más de un frame (animación)
+    if (s->frameCount > 1) {
+        s->timeCounter += deltaTime;
+        if (s->timeCounter >= s->frameTime) {
+            s->currentFrame = (s->currentFrame + 1) % s->frameCount;
+            s->frameRec.x = s->currentFrame * s->frameRec.width;
+            s->timeCounter = 0.0f;
+        }
     }
 }
 
+<<<<<<< Updated upstream
 void DibujarSprite(Sprite* s, Vector2 posicion, bool esPersonaje) {
     float escala = TILE_SIZE / s->frameRec.width;
     
@@ -52,12 +66,68 @@ void DibujarSprite(Sprite* s, Vector2 posicion, bool esPersonaje) {
     if (!esPersonaje) {
         // Ajuste para enemigos/fuego: alinear con el suelo
         destRec.y += TILE_SIZE - destRec.height;
+=======
+void DibujarSprite(Sprite* s, Vector2 posicion) {
+    float escala;
+    Rectangle destino;
+
+    switch (s->tipo) {
+        case SPRITE_PERSONAJE:
+            escala = TILE_SIZE / s->frameRec.width;
+            destino = (Rectangle){
+                posicion.x,
+                posicion.y,
+                s->frameRec.width * escala,
+                s->frameRec.height * escala
+            };
+            break;
+
+        case SPRITE_OBJETO:
+        case SPRITE_ENEMIGO:
+            escala = 0.8f;
+            destino = (Rectangle){
+                s->position.x + (TILE_SIZE - TILE_SIZE * escala) / 2,
+                s->position.y + TILE_SIZE - TILE_SIZE * escala,
+                TILE_SIZE * escala,
+                TILE_SIZE * escala
+            };
+            break;
+    }
+
+    Rectangle origen = s->frameRec;
+    if (s->flipX) {
+        origen.width = -origen.width;
+>>>>>>> Stashed changes
     }
 
     DrawTexturePro(
         s->texture,
+<<<<<<< Updated upstream
         sourceRec,
         destRec,
+=======
+        origen,
+        destino,
+        (Vector2){0, 0},
+        0.0f,
+        WHITE
+    );
+}
+
+void DibujarSpriteObjeto(Sprite* s) {
+    float escala = 0.8f;
+    Rectangle destino = (Rectangle){
+        s->position.x + (TILE_SIZE - TILE_SIZE * escala) / 2,
+        s->position.y + TILE_SIZE - TILE_SIZE * escala,
+        TILE_SIZE * escala,
+        TILE_SIZE * escala
+    };
+
+    DrawTexturePro(
+        s->texture,
+        s->frameRec,
+        destino,
+>>>>>>> Stashed changes
         (Vector2){0, 0},
         0.0f,
         WHITE
