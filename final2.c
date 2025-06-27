@@ -150,7 +150,7 @@ void LimpiarInventario(HashMap* inventario) {
 
 // --- FUNCIONES AUXILIARES ---
 
-void CargarMapa(const char* nombreArchivo, int*** mapaPtr, int* ancho, int* alto)
+void CargarMapa(const char* nombreArchivo, int*** mapaPtr, int* ancho, int* alto, Personaje* jugador)
 {
     FILE* archivo = fopen(nombreArchivo, "r");
     if (!archivo) {
@@ -181,7 +181,7 @@ void CargarMapa(const char* nombreArchivo, int*** mapaPtr, int* ancho, int* alto
     {
         (*mapaPtr)[y] = (int*)malloc((*ancho) * sizeof(int));
     }
-
+    int spawnFound = 0;
     for (int y = 0; y < *alto; y++)
     {
         for (int x = 0; x < *ancho; x++)
@@ -197,11 +197,17 @@ void CargarMapa(const char* nombreArchivo, int*** mapaPtr, int* ancho, int* alto
 
             if ((*mapaPtr)[y][x] == 9)
             {
-                jugador.posicion = (Vector2){ (float)x * TILE_SIZE, (float)y * TILE_SIZE };
-                jugador.spawn = jugador.posicion; // Guardar posición inicial (spawn)
+                (*jugador).posicion = (Vector2){ (float) x * TILE_SIZE, (float) y * TILE_SIZE };
+                (*jugador).spawn = (*jugador).posicion; // Guardar posición inicial (spawn)
                 (*mapaPtr)[y][x] = 0; // Set spawn point to empty tile
+                spawnFound = 1;
             }
         }
+    }
+    if (!spawnFound) 
+    {
+        (*jugador).posicion = (Vector2){1 * TILE_SIZE, 1 * TILE_SIZE};
+        (*jugador).spawn = (*jugador).posicion;
     }
     fclose(archivo);
 }
@@ -354,7 +360,7 @@ void ActualizarGameplay()
             mapa = NULL;
 
             mapaActual = mapaActual->este;
-            CargarMapa(mapaActual->archivoMapa, &mapa, &mapaActual->ancho, &mapaActual->alto);
+            CargarMapa(mapaActual->archivoMapa, &mapa, &mapaActual->ancho, &mapaActual->alto, &jugador);
             jugador.posicion.x = 1 * TILE_SIZE;
         }
     }
@@ -368,7 +374,7 @@ void ActualizarGameplay()
             mapa = NULL;
 
             mapaActual = mapaActual->oeste;
-            CargarMapa(mapaActual->archivoMapa, &mapa, &mapaActual->ancho, &mapaActual->alto);
+            CargarMapa(mapaActual->archivoMapa, &mapa, &mapaActual->ancho, &mapaActual->alto, &jugador);
             jugador.posicion.x = (mapaActual->ancho - 2) * TILE_SIZE;
         }
     }
@@ -408,7 +414,7 @@ void ActualizarGameOver() {
         mapaActual = mapaInicial;  
         LimpiarInventario(jugador.inventario);         // Volver a cargar el mapa actual:
         jugador.inventario = createMap(100);
-        CargarMapa(mapaActual->archivoMapa, &mapa, &mapaActual->ancho, &mapaActual->alto);
+        CargarMapa(mapaActual->archivoMapa, &mapa, &mapaActual->ancho, &mapaActual->alto, &jugador);
     }
 }
 
@@ -597,10 +603,10 @@ int main() {
 
     
     InicializarPersonaje(&jugador);
-
-    CargarMapa(mapaActual->archivoMapa, &mapa, &mapaActual->ancho, &mapaActual->alto);
-    
     personaje_sprites_main(&jugador);
+    CargarMapa(mapaActual->archivoMapa, &mapa, &mapaActual->ancho, &mapaActual->alto, &jugador);
+    
+    
 
     // Lista para llevar un registro de todos los nodos del grafo
     NodoMapa* todosLosMapas[] = {mapa1, mapa2, mapa3};
