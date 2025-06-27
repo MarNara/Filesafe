@@ -64,4 +64,8 @@ git commit -m "avance"
 ```bash
 git push origin main
 ```
+## comando que actualiza todos los cambios guardados de otros:
 
+```bash
+git pull origin main
+```
