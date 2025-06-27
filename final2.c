@@ -401,11 +401,8 @@ void ActualizarGameplay()
     int tileActual = mapa[tileY][tileX];
 
     if(tileActual == 6 || tileActual == 7 || tileActual == 8) {
-        jugador.vida -= 2; // o cualquier daño que estimes
+        jugador.vida -= 1; // o cualquier daño que estimes
     }
-    if(tileActual == 6) DrawText("¡Electricidad!", 10, 70, 20, RED);
-    if(tileActual == 7) DrawText("¡Sierra peligrosa!", 10, 70, 20, RED);
-    if(tileActual == 8) DrawText("¡Fuego!", 10, 70, 20, RED);
 
     if (tileActual == 4) { // Fruta
         // Registrar posición recolectada
@@ -536,6 +533,19 @@ void DrawNameInput(float scaleX, float scaleY) {
 void DrawGameplay(float scaleX, float scaleY) {
     BeginMode2D(camara);
         DibujarMapa(mapa, mapaActual->ancho, mapaActual->alto);
+        int tileX = (int)(jugador.posicion.x / TILE_SIZE);
+        int tileY = (int)(jugador.posicion.y / TILE_SIZE);
+        int tileActual = mapa[tileY][tileX];
+        
+        if(tileActual == 6) 
+            DrawText("¡Electricidad!",
+                     jugador.posicion.x - 125, jugador.posicion.y - 75, 50, RED);
+        else if(tileActual == 7) 
+            DrawText("¡Sierra peligrosa!",
+                     jugador.posicion.x- 125 , jugador.posicion.y - 75, 50, RED);
+        else if(tileActual == 8) 
+            DrawText("¡Fuego!",
+                     jugador.posicion.x - 125, jugador.posicion.y - 75, 50, RED);
         
         // Dibujar sprites externos (enemigos, fuego, etc.)
         Node* nodo = spritesActivos->head;
