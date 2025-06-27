@@ -552,10 +552,14 @@ void DibujarInventarioInteractivo(float x, float y, float lineHeight) {
     DrawText("ESC: salir", (int)x, (int)(y + lineHeight * totalItems + 30), 15, LIGHTGRAY);
 }
 
-void DrawNameInput(float scaleX, float scaleY) {
-    DrawText("INGRESA TU NOMBRE:", (int)(scaleX * 400), (int)(scaleY * 200), (int)(scaleY * 30), WHITE);
-    DrawText(jugador.nombre, (int)(scaleX * 400), (int)(scaleY * 250), (int)(scaleY * 30), PINK);
-    DrawText("Presiona ENTER para continuar", (int)(scaleX * 400), (int)(scaleY * 300), (int)(scaleY * 20), WHITE);
+//MODIFICAR----------------------------------------------------------------------------------------------------------------------
+void DrawNameInput(Texture2D fondoNombre, float scaleX, float scaleY) {
+    // Dibujar fondo de pantalla escalado
+    DrawTextureEx(fondoNombre, (Vector2){0, 0}, 0.0f, scaleX, WHITE);
+
+    DrawText("INGRESA TU NOMBRE:", (int)(scaleX * 425), (int)(scaleY * 200), (int)(scaleY * 30), WHITE);
+    DrawText(jugador.nombre, (int)(scaleX * 425), (int)(scaleY * 250), (int)(scaleY * 30), PINK);
+    DrawText("Presiona ENTER para continuar", (int)(scaleX * 425), (int)(scaleY * 300), (int)(scaleY * 20), WHITE);
 }
 
 void DrawGameplay(float scaleX, float scaleY) {
@@ -656,7 +660,10 @@ void personaje_sprites_main(Personaje* jugador)
 
 }
 
-void DrawGameOver(float scaleX, float scaleY) {
+void DrawGameOver(Texture2D fondoGameOver, float scaleX, float scaleY) {
+    DrawTextureEx(fondoGameOver, (Vector2){0, 0}, 0.0f, scaleX, WHITE);
+
+
     DrawText("GAME OVER", (int)(scaleX * 500), (int)(scaleY * 300), (int)(scaleY * 50), RED);
     DrawText("Presiona ENTER para volver al menu", (int)(scaleX * 400), (int)(scaleY * 400), (int)(scaleY * 30), WHITE);
 }
@@ -692,6 +699,9 @@ int main() {
     // Cargar imagen de menú
     Image image = LoadImage("Menus/Menu_incial.png");
     Texture2D Menu_inicial_imagen = LoadTextureFromImage(image);
+    Texture2D fondoNombre = LoadTexture("Menus/fondo_nombre.jpg");////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    Texture2D fondoGameOver = LoadTexture("Menus/fondo_Game_over.jpg");//////////////////////////////////////////////////////////////////////////////
+
     UnloadImage(image);
 
     frutasRecolectadas = createMap(10);
@@ -763,9 +773,9 @@ int main() {
 
         switch (pantallaDeJuego) {
             case MENU: DrawMenu(Menu_inicial_imagen, scaleX, scaleY); break;
-            case PONER_NOMBRE: DrawNameInput(scaleX, scaleY); break;
+            case PONER_NOMBRE: DrawNameInput(fondoNombre,scaleX, scaleY); break;//----------------------------------------------------------------------------
             case GAMEPLAY: DrawGameplay(scaleX, scaleY); break;
-            case GAME_OVER: DrawGameOver(scaleX, scaleY); break;
+            case GAME_OVER: DrawGameOver(fondoGameOver, scaleX, scaleY); break;
             case INVENTARIO: DibujarInventarioInteractivo(50, 50, 30); break;
         }
 
