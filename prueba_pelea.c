@@ -93,8 +93,8 @@ int main() {
         // Animación de ataque extendida
         if (animandoAtaque) {
             animFrame++;
-            float avance = 3.0f; // avance por frame más suave
-            int duracionTotal = 20; // duración total 20 frames
+            float avance = 30.f; // avance por frame más suave
+            int duracionTotal = 30; // duración total 20 frames
 
             if (animFrame <= duracionTotal / 2) {
                 if (animandoJugador)
