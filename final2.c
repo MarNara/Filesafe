@@ -474,16 +474,17 @@ void ActualizarGameOver() {
         // Actualizar mapaInicial
         mapaInicial = todosLosMapas[0];
         mapaActual = mapaInicial;
-        
-        // Recargar mapa inicial
-        CargarMapa(mapaActual->archivoMapa, &mapa, &mapaActual->ancho, &mapaActual->alto, &jugador);
-        
-        // Limpiar frutas recolectadas usando cleanMap
+
         if (frutasRecolectadas != NULL) {
             cleanMap(frutasRecolectadas, freeList);
         }
         frutasRecolectadas = createMap(100);  // Reiniciar
     }
+        // Recargar mapa inicial
+        CargarMapa(mapaActual->archivoMapa, &mapa, &mapaActual->ancho, &mapaActual->alto, &jugador);
+        
+        // Limpiar frutas recolectadas usando cleanMap
+
 }
 
 // --- FUNCIONES DE DIBUJO ---
