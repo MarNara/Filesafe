@@ -226,11 +226,11 @@ int main() {
 
         if (!batallaActiva) {
             if (player.vida <= 0)
-                DrawText("Has perdido!", 300, 300, 30, RED);
+                DrawText("¡Has perdido!", 300, 300, 30, RED);
             else if (enemy.vida <= 0)
-                DrawText("Has ganado!", 300, 300, 30, GREEN);
+                DrawText("¡Has ganado!", 300, 300, 30, GREEN);
             else if (enemigoLiberado)
-                DrawText("Liberaste al robot!", 250, 300, 25, DARKGREEN);
+                DrawText("¡Has liberado a esta persona!", 250, 300, 25, DARKGREEN);
 
             DrawText("Presiona Q para salir...", 250, 400, 20, DARKGRAY);
         }
