@@ -84,17 +84,17 @@ Al presionar enter este vuelve a la pantalla de inicio.
 
 
 ## Contribuciones de cada integrante y roles
-Juan Gatica:
+**Juan Gatica:**
 Descubrió y facilitó el uso de la biblioteca Raylib, permitiendo el desarrollo gráfico del juego en lenguaje C. Creó la función de carga de archivos de manera exitosa y desarrolló la lógica base de movimiento del personaje, incluyendo una mecánica de salto funcional y estable. Además, se encargó de revisar la implementación de la lógica de ataque y del juego en general. Además se encargó de que los elementos del juego se adapten a su escenario correspondiente.
 
-Anyara Guajardo:
+**Anyara Guajardo:**
 Organizó los TDAs en una carpeta dedicada, aportando a la claridad del proyecto, además de completar el diseño de los mapas. Desarrolló un prototipo de la parte gráfica inicial del juego y fue responsable de buscar y adaptar los sprites utilizados. Contribuyó con ideas para la implementación del inventario, y realizó pruebas exhaustivas del sistema de combate para detectar fallas. También revisó posibles problemas del menú de juego y lo completo, además validó el sistema de carga de archivos.
 
 
-Martina Ahumada:
+**Martina Ahumada:**
 Creó el repositorio del proyecto e integró todos los TDAs. Fue la encargada de diseñar y estructurar los mapas del juego. Completó la logica de colisiones en el menú de combate, con un mínimo de errores. Se encargó de revisar el funcionamiento del HashMap, gestionar el manejo de memoria, realizar pruebas funcionales completas del juego e integrar el menú de combate al juego principal y mejorar tanto los aspectos visuales como las instrucciones del archivo README.
 
-Hans Gonzalez:
+**Hans Gonzalez:**
 Colaboró en la creación de los menús del juego y diseñó la estructura del personaje, incluyendo atributos como el nombre y la vida. Participó en el diseño del menú de combate, revisando elementos como el inventario, la vida del jugador y del enemigo, la opción de hackear NPCs para liberarlos del control de la IA, la opción inventario y también la opción de lucha. Además, se encargó de crear los NPCs e implementó el escenario de combate.
 
 **Observación**
