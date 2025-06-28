@@ -67,6 +67,7 @@ La opción menú de inicio (o principal) funciona correctamente, ya que permite 
 - Los botiquines fueron implementados como cuadros, debido a que ocurrian problemas al tener dos sprites juntos, es decir, los bloques de la pared y el botiquin delante del bloque generaba que ambos se unieran.
 - Al mover la ventana el personaje sufre de bugs.
 - Hay animaciones que quedaron pegadas al escenario, como por ejemplo un guardia pegado a la mitad de la pared.
+- No se aceptan numeros ni letras con tilde en el nombre del personaje. 
 - Al cerrar la ventana de lucha se cierra el juego completamente, puesto que esto ocurrió debido a falta de tiempo.
 
 ## Ejemplos que muestran cómo interactuar con la aplicación.
