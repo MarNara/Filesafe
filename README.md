@@ -9,6 +9,7 @@ Descripción: El juego Filesafe se desarrolla en un mundo distópico en el que u
 **En caso de no tener la biblioteca Raylib aqui mostramos los pasos de como instalarla:**
 1.  Debes instalar MSYS2 MinGw W64. Puede hacerlo ingresando a la siguiente página: https://www.msys2.org/
 Descarga e instala MSYS2 para Windows.
+Presionar next de manera continua hasta que comience a cargar después de instalar msys2
 
 2.  Ahora debes ingresar a la terminal de MSYS2 MinGw W64 y escribir el siguiente comando:
 ```bash
@@ -33,7 +34,11 @@ gcc --version
 ```bash
 pkg-config --libs raylib
 ```
+Poner en el buscar del ordenador "Editar las variables de entorno del sistema", ir al botón de "Variables de entorno" y editar Path, presionar el botón "nuevo" y luego el de "examinar", después ingresar a la carpeta en que está msys64 e ingresar a mingw64 y seleccionar la carpeta bin, asi debería verse luego de seguir esos pasos: 
+![Inicio del juego](Ejemplos_Uso/bin_sacadoDeExaminar.png)
 
+ y luego subir la carpeta bin al inicio de archivos que hay, asi debería verse despues de subir:
+![Inicio del juego](Ejemplos_Uso/subir_Bin.png)
 
 Ahora debes Ingresar al visual studio code. -Clonar en repositorio GitHub el link enviado al aula virtual:
 
@@ -55,12 +60,16 @@ Abre la terminal con ctrl + ñ.
 ```
 
 ## Opciones que funcionan correctamente y las que no lo hacen:
-La opción menú de inicio (o principal) funciona correctamente, ya que permite ejecutar salida, mover arriba y abajo e iniciar el juego. Por otra parte, en el menú de pelea, luchar funciona bien, y librar funciona correctamente al cumplir la condición para poder librar al enemigo (la cual es que el enemigo tenga 10 de vida), el inventario se abre, sin embargo, no se muestran las frutas guardadas. Además la pantalla de Game Over funciona correctamente.
+La opción menú de inicio (o principal) funciona correctamente, ya que permite ejecutar salida, mover arriba y abajo e iniciar el juego. Por otra parte, en el menú de pelea, luchar funciona bien, y librar funciona correctamente al cumplir la condición para poder librar al enemigo (la cual es que el enemigo tenga 10 de vida), el inventario se abre y guarda bien, el inventario de la mochila cuando usa la primera cura lo hace de manera automática y la segunda cura funciona de manera manual. Además la pantalla de Game Over funciona correctamente.
 
----Observación---
-Creemos que una posible causa de que el inventario no se pueda conectar correctamente sea debido a una mala comunicación de los archivos. 
+**---Observación---**
 
-Las frutas fueron implementadas como cuadros debido a que ocurrian problemas al tener dos sprites juntos, es decir, los bloque de la pared y la fruta delante del bloque, esto generaba que ambas se unieran.
+- Los botiquines fueron implementados como cuadros, debido a que ocurrian problemas al tener dos sprites juntos, es decir, los bloques de la pared y el botiquin delante del bloque generaba que ambos se unieran.
+- Al mover la ventana el personaje sufre de bugs.
+- Hay animaciones que quedaron pegadas al escenario, como por ejemplo un guardia pegado a la mitad de la pared.
+- No se aceptan numeros ni letras con tilde en el nombre del personaje. 
+- Cuando se recojen botiquines y se usan todos durante el juego (es decir el recorrido) y si vuelven a recojer botiquines, el hashmap se bugea y se cierra el juego.
+- Al cerrar la ventana de lucha se cierra el juego completamente, puesto que esto ocurrió debido a falta de tiempo.
 
 ## Ejemplos que muestran cómo interactuar con la aplicación.
 
@@ -100,4 +109,4 @@ Colaboró en la creación de los menús del juego y diseñó la estructura del p
 **Observación**
 Si bien cada uno se encargaba de una parte del funcionamiento del codigo en específico de igual forma se recibía ayuda mutuamente corrigiendo errores, por lo tanto las contribuciones no muestra realmente si alguien realizó muchas o pocas cosas en el código, ya que se realizaron muchos otros códigos y funciones de prueba que por motivos de presentación para la entrega hemos tenido que eliminarlas. 
 
-Por otra parte, se utilizaron los comandos commit en la terminal bash para agregar cambios nuevos al repositorio y se trbajao con una rama test para hacer pruebas de codigos.
+Por otra parte, se utilizaron los comandos commit en la terminal bash para agregar cambios nuevos al repositorio y se trabajo con una rama test para hacer pruebas de codigos.

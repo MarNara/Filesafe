@@ -7,14 +7,7 @@
 
 #define SCREEN_WIDTH 800
 #define SCREEN_HEIGHT 600
-static double ultimaAccion = 0;
-
-typedef enum {
-    OPCION_LUCHAR = 0,
-    OPCION_MOCHILA,
-    OPCION_LIBERAR,
-    OPCION_TOTAL
-} OpcionMenu;
+// static double ultimaAccion = 0; // Esta variable no se usa actualmente.
 
 typedef struct {
     char nombre[20];
@@ -43,81 +36,121 @@ void enemigoAtaca(Combatiente *enemigo, Combatiente *jugador) {
     if (jugador->vida < 0) jugador->vida = 0;
 }
 
-void mostrarInventario(HashMap* inventario, Combatiente* jugador, bool* mostrando, bool* turnoJugador) {
-    static int seleccion = 0;
+// Función auxiliar para contar ítems en el HashMap
+int ContarItemsInventario(HashMap* inventario) {
+    int count = 0;
+    Pair* par = firstMap(inventario);
+    while (par != NULL) {
+        count++;
+        par = nextMap(inventario);
+    }
+    return count;
+}
+
+// Función auxiliar para obtener un ítem por su posición
+Pair* ObtenerItemEnPosicionInventario(HashMap* inventario, int pos) {
+    Pair* par = firstMap(inventario);
+    int i = 0;
+    while (par != NULL) {
+        if (i == pos) return par;
+        par = nextMap(inventario);
+        i++;
+    }
+    return NULL;
+}
+
+// Se añadió 'seleccionMenuPelea' para permitir que el inventario afecte la selección del menú principal de combate.
+void mostrarInventario(HashMap* inventario, Combatiente* jugador, bool* mostrando, bool* turnoJugador, OpcionMenu* seleccionMenuPelea) {
+    static int seleccionItemInventario = 0; // Renombrado para evitar conflicto y ser más específico.
     static bool enterBloqueado = false;
-    int totalItems = 0;
+    int totalItems = ContarItemsInventario(inventario); // Usa función auxiliar.
 
     Rectangle rectInventario = {200, 150, 400, 300};
-    Rectangle botonCerrar = {rectInventario.x + rectInventario.width - 30, rectInventario.y + 10, 20, 20};
+    // El botón cerrar ha sido retirado, ahora se usa la tecla 'M' para salir.
 
     DrawRectangleRec(rectInventario, LIGHTGRAY);
     DrawRectangleLinesEx(rectInventario, 2, GRAY);
     DrawText("Inventario", 320, 170, 25, BLACK);
 
-    if (firstMap(inventario) == NULL) {
+    if (totalItems == 0) {
         DrawText("No tienes objetos.", rectInventario.x + 120, 250, 20, DARKGRAY);
+        // Si no hay ítems, la única opción es salir con 'M'.
+        if (IsKeyPressed(KEY_M)) {
+            *mostrando = false;
+            enterBloqueado = false;
+            *turnoJugador = true; // No se consume el turno si no se usa un ítem.
+            return;
+        }
+        return;
     }
 
-    DrawRectangleRec(botonCerrar, RED);
-    DrawText("X", botonCerrar.x + 5, botonCerrar.y + 2, 18, WHITE);
-
-    // Contar ítems
-    for (Pair* p = firstMap(inventario); p != NULL; p = nextMap(inventario)) {
-        totalItems++;
+    // Asegura que la selección sea válida si los ítems cambian.
+    if (seleccionItemInventario >= totalItems) {
+        seleccionItemInventario = totalItems - 1;
+        if (seleccionItemInventario < 0) seleccionItemInventario = 0;
     }
 
-    if (seleccion >= totalItems) seleccion = 0;
+    if (IsKeyPressed(KEY_DOWN)) seleccionItemInventario = (seleccionItemInventario + 1) % totalItems;
+    if (IsKeyPressed(KEY_UP)) seleccionItemInventario = (seleccionItemInventario - 1 + totalItems) % totalItems;
 
-    if (IsKeyPressed(KEY_DOWN)) seleccion = (seleccion + 1) % totalItems;
-    if (IsKeyPressed(KEY_UP)) seleccion = (seleccion - 1 + totalItems) % totalItems;
-
-    if (IsKeyPressed(KEY_DELETE)) {
+    // Permite salir del inventario con la tecla 'M'.
+    if (IsKeyPressed(KEY_M)) {
         *mostrando = false;
         enterBloqueado = false;
+        *seleccionMenuPelea = OPCION_MOCHILA; // Vuelve a la opción Mochila en el menú principal.
+        *turnoJugador = true; // No se consume el turno.
         return;
     }
 
     int y = 220;
-    int i = 0;
-    Pair* par = firstMap(inventario);
-    while (par != NULL) {
+    // Itera y dibuja los ítems del inventario.
+    for (int i = 0; i < totalItems; i++) {
+        Pair* par = ObtenerItemEnPosicionInventario(inventario, i);
+        if (par == NULL) continue;
+
         Item* item = (Item*)par->value;
         char nombreConCantidad[64];
-        snprintf(nombreConCantidad, sizeof(nombreConCantidad), "%s x%d", par->key, item->cantidad);
+        snprintf(nombreConCantidad, sizeof(nombreConCantidad), "%s x%d (Cura: %d)", item->nombre, item->cantidad, item->cura);
 
-        Rectangle slot = {rectInventario.x + 20, y, 200, 30};
-        DrawRectangleRec(slot, i == seleccion ? GRAY : LIGHTGRAY);
+        Rectangle slot = {rectInventario.x + 20, y, 360, 30}; // Aumentado el ancho para mostrar la cura.
+        DrawRectangleRec(slot, i == seleccionItemInventario ? GRAY : LIGHTGRAY);
         DrawRectangleLinesEx(slot, 1, DARKGRAY);
         DrawText(nombreConCantidad, slot.x + 5, slot.y + 5, 18, BLACK);
 
-        if (i == seleccion) {
-            if (IsKeyDown(KEY_ENTER)) {
+        if (i == seleccionItemInventario) {
+            if (IsKeyPressed(KEY_N)) { // <-- Aquí solo cambio la tecla para usar el ítem a 'N'
                 if (!enterBloqueado) {
                     jugador->vida += item->cura;
                     if (jugador->vida > 100) jugador->vida = 100;
 
                     item->cantidad--;
                     if (item->cantidad <= 0) {
-                        free(item);
-                        eraseMap(inventario, par->key);
+                        free(item); // Libera la memoria del ítem.
+                        eraseMap(inventario, par->key); // Elimina el ítem del HashMap.
+                        // Ajusta la selección si el total de ítems cambia.
+                        totalItems = ContarItemsInventario(inventario);
+                        if (seleccionItemInventario >= totalItems && totalItems > 0) {
+                            seleccionItemInventario = totalItems - 1;
+                        } else if (totalItems == 0) {
+                            seleccionItemInventario = 0;
+                        }
                     }
 
-                    *mostrando = false;
-                    *turnoJugador = false;
-                    seleccion = 0;
+                    *mostrando = false; // Cierra el inventario.
+                    *turnoJugador = false; // Consume el turno del jugador.
                     enterBloqueado = true;
+                    *seleccionMenuPelea = OPCION_LUCHAR; // Regresa a la opción Luchar del menú principal.
                     return;
                 }
             } else {
                 enterBloqueado = false;
             }
         }
-
         y += 40;
-        par = nextMap(inventario);
-        i++;
     }
+    // Instrucciones de uso en el inventario actualizadas.
+    DrawText("N: usar item", rectInventario.x + 20, rectInventario.y + rectInventario.height - 40, 15, BLACK);
+    DrawText("M: volver al combate", rectInventario.x + 20, rectInventario.y + rectInventario.height - 20, 15, BLACK);
 }
 
 
@@ -136,7 +169,7 @@ bool iniciar_pelea(Combatiente *jugador, Combatiente *enemigo, HashMap* inventar
     bool batallaActiva = true;
     bool mostrandoInventario = false;
     bool enemigoLiberado = false;
-    OpcionMenu seleccion = OPCION_LUCHAR;
+    OpcionMenu seleccion = OPCION_LUCHAR; // Variable para la selección del menú de combate.
 
     bool turnoJugador = true;
     bool animandoAtaque = false;
@@ -150,12 +183,17 @@ bool iniciar_pelea(Combatiente *jugador, Combatiente *enemigo, HashMap* inventar
     const float ANCHO_ENEMIGO = 150.0f;
     const float ALTO_ENEMIGO = 150.0f;
 
-    while (!WindowShouldClose() && !IsKeyPressed(KEY_ESCAPE)) {
+    while (!WindowShouldClose()) { // Se quitó la condición IsKeyPressed(KEY_ESCAPE) para manejo externo.
         int width = GetScreenWidth();
         int height = GetScreenHeight();
         float scaleX = (float)width / SCREEN_WIDTH;
         float scaleY = (float)height / SCREEN_HEIGHT;
         cam.zoom = (scaleX < scaleY) ? scaleX : scaleY;
+
+        // Permite salir de la batalla con ESC una vez que ha terminado.
+        if (!batallaActiva && IsKeyPressed(KEY_ESCAPE)) {
+            break;
+        }
 
         if (animandoAtaque) {
             animFrame++;
@@ -181,7 +219,7 @@ bool iniciar_pelea(Combatiente *jugador, Combatiente *enemigo, HashMap* inventar
                 animandoAtaque = false;
                 animOffsetPlayerX = 0;
                 animOffsetEnemyX = 0;
-                turnoJugador = !animandoJugador;
+                turnoJugador = !animandoJugador; // Cambia el turno después de la animación.
             }
         }
 
@@ -204,16 +242,13 @@ bool iniciar_pelea(Combatiente *jugador, Combatiente *enemigo, HashMap* inventar
                             if (enemigo->vida <= 10) {
                                 enemigoLiberado = true;
                                 batallaActiva = false;
-                            }
-                            if (!enemigoLiberado) {
-                                turnoJugador = true;
                             } else {
-                                turnoJugador = false;
+                                // El enemigo no está lo suficientemente débil. El turno del jugador no cambia.
                             }
                             break;
                     }
                 }
-            } else {
+            } else { // Turno del enemigo
                 if (batallaActiva) {
                     animandoAtaque = true;
                     animandoJugador = false;
@@ -227,6 +262,7 @@ bool iniciar_pelea(Combatiente *jugador, Combatiente *enemigo, HashMap* inventar
         }
 
         BeginDrawing();
+        ClearBackground(BLACK);
         DrawTexturePro(
             texFondo,
             (Rectangle){0, 0, texFondo.width, texFondo.height},
@@ -257,7 +293,7 @@ bool iniciar_pelea(Combatiente *jugador, Combatiente *enemigo, HashMap* inventar
         }
 
         if (mostrandoInventario) {
-            mostrarInventario(inventario, jugador, &mostrandoInventario, &turnoJugador);
+            mostrarInventario(inventario, jugador, &mostrandoInventario, &turnoJugador, &seleccion);
         }
 
         if (!batallaActiva) {
@@ -282,5 +318,6 @@ bool iniciar_pelea(Combatiente *jugador, Combatiente *enemigo, HashMap* inventar
 
     if (enemigo->vida <= 0) return true;
     if (jugador->vida <= 0) return false;
+    if (enemigoLiberado) return true;
     return false;
 }
