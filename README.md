@@ -60,12 +60,14 @@ Abre la terminal con ctrl + ñ.
 ```
 
 ## Opciones que funcionan correctamente y las que no lo hacen:
-La opción menú de inicio (o principal) funciona correctamente, ya que permite ejecutar salida, mover arriba y abajo e iniciar el juego. Por otra parte, en el menú de pelea, luchar funciona bien, y librar funciona correctamente al cumplir la condición para poder librar al enemigo (la cual es que el enemigo tenga 10 de vida), el inventario se abre, sin embargo, no se muestran las frutas guardadas. Además la pantalla de Game Over funciona correctamente.
+La opción menú de inicio (o principal) funciona correctamente, ya que permite ejecutar salida, mover arriba y abajo e iniciar el juego. Por otra parte, en el menú de pelea, luchar funciona bien, y librar funciona correctamente al cumplir la condición para poder librar al enemigo (la cual es que el enemigo tenga 10 de vida), el inventario se abre y guarda bien, el inventario de la mochila cuando usa la primera cura lo hace de manera automática y la segunda cura funciona de manera manual. Además la pantalla de Game Over funciona correctamente.
 
----Observación---
-Creemos que una posible causa de que el inventario no se pueda conectar correctamente sea debido a una mala comunicación de los archivos. 
+**---Observación---**
 
-Las frutas fueron implementadas como cuadros debido a que ocurrian problemas al tener dos sprites juntos, es decir, los bloque de la pared y la fruta delante del bloque, esto generaba que ambas se unieran.
+- Los botiquines fueron implementados como cuadros, debido a que ocurrian problemas al tener dos sprites juntos, es decir, los bloques de la pared y el botiquin delante del bloque generaba que ambos se unieran.
+- Al mover la ventana el personaje sufre de bugs.
+- Hay animaciones que quedaron pegadas al escenario, como por ejemplo un guardia pegado a la mitad de la pared.
+- Al cerrar la ventana de lucha se cierra el juego completamente, puesto que esto ocurrió debido a falta de tiempo.
 
 ## Ejemplos que muestran cómo interactuar con la aplicación.
 
