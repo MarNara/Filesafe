@@ -37,16 +37,16 @@ typedef struct {
     Vector2 offsetVisual;  // Offset visual para alinear el sprite con la hitbox
 
     // Estados físicos
-    bool enSuelo;              // ¿Está tocando el suelo?
-    bool puedeDash;            // ¿Puede hacer dash?
-    bool estaDashing;          // ¿Está actualmente en un dash?
-    bool puedeDobleSalto;      // ¿Tiene disponible un doble salto?
-    bool enParedIzquierda;     // ¿Está tocando una pared a la izquierda?
-    bool enParedDerecha;       // ¿Está tocando una pared a la derecha?
+    bool enSuelo;              // Está tocando el suelo
+    bool puedeDash;            // Puede hacer dash
+    bool estaDashing;          // Está actualmente en un dash
+    bool puedeDobleSalto;      // Tiene disponible un doble salto
+    bool enParedIzquierda;     // Está tocando una pared a la izquierda
+    bool enParedDerecha;       // Está tocando una pared a la derecha
     bool mirandoDerecha;       // Dirección en la que está mirando
 
     // Timers de mecánicas
-    float tiempoCambioDireccion; // (opcional) puede usarse para animaciones o control fino
+    float tiempoCambioDireccion; 
     float tiempoCoyote;          // Duración total del "coyote time"
     float contadorCoyote;        // Temporizador que se va agotando desde que deja el suelo
     float tiempoBufferSalto;     // Tiempo total para aceptar un salto anticipado
