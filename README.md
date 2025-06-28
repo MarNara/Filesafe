@@ -99,3 +99,5 @@ Colaboró en la creación de los menús del juego y diseñó la estructura del p
 
 **Observación**
 Si bien cada uno se encargaba de una parte del funcionamiento del codigo en específico de igual forma se recibía ayuda mutuamente corrigiendo errores, por lo tanto las contribuciones no muestra realmente si alguien realizó muchas o pocas cosas en el código, ya que se realizaron muchos otros códigos y funciones de prueba que por motivos de presentación para la entrega hemos tenido que eliminarlas. 
+
+Por otra parte, se utilizaron los comandos commit en la terminal bash para agregar cambios nuevos al repositorio y se trbajao con una rama test para hacer pruebas de codigos.
