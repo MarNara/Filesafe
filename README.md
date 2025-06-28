@@ -6,7 +6,7 @@ Descripción: El juego Filesafe se desarrolla en un mundo distópico en el que u
 - Tener instalado Visual Studio Code.
 - Tener instalada la biblioteca Raylib.
 
-**En caso de no tener la biblioteca Raylib aqui te mostramos los pasos de como instalarla:**
+**En caso de no tener la biblioteca Raylib aqui mostramos los pasos de como instalarla:**
 1.  Debes instalar MSYS2 MinGw W64. Puede hacerlo ingresando a la siguiente página: https://www.msys2.org/
 Descarga e instala MSYS2 para Windows.
 
@@ -55,7 +55,7 @@ Abre la terminal con ctrl + ñ.
 ```
 
 ## Opciones que funcionan correctamente y las que no lo hacen:
-La opción menú de inicio (o principal) funciona correctamente, ya que permite ejecutar salida, mover arriba y abajo e iniciar el juego. Por otra parte, en el menú de pelea, luchar funciona bien, y librar funciona correctamente al cumplir la condición para poder librar al enemigo, el inventario se abre, sin embargo, no se muestran las frutas guardadas. Además la pantalla de Game Over funciona correctamente.
+La opción menú de inicio (o principal) funciona correctamente, ya que permite ejecutar salida, mover arriba y abajo e iniciar el juego. Por otra parte, en el menú de pelea, luchar funciona bien, y librar funciona correctamente al cumplir la condición para poder librar al enemigo (la cual es que el enemigo tenga 10 de vida), el inventario se abre, sin embargo, no se muestran las frutas guardadas. Además la pantalla de Game Over funciona correctamente.
 
 ---Observación---
 Creemos que una posible causa de que el inventario no se pueda conectar correctamente sea debido a una mala comunicación de los archivos. 
@@ -98,4 +98,4 @@ Creó el repositorio del proyecto e integró todos los TDAs. Fue la encargada de
 Colaboró en la creación de los menús del juego y diseñó la estructura del personaje, incluyendo atributos como el nombre y la vida. Participó en el diseño del menú de combate, revisando elementos como el inventario, la vida del jugador y del enemigo, la opción de hackear NPCs para liberarlos del control de la IA, la opción inventario y también la opción de lucha. Además, se encargó de crear los NPCs e implementó el escenario de combate.
 
 **Observación**
-Si bien cada uno se encargaba de una parte del funcionamiento del codigo en específico de igual forma se recibía ayuda mutuamente corrigiendo errores, por lo tanto las contribuciones no muestra realmente si alguien realizó muchas o pocas cosas en el código, ya que se realizaron muchos otros códigos y funciones de prueba que por motivos de presentación para la entrega hemos tenido que eliminarlas.
+Si bien cada uno se encargaba de una parte del funcionamiento del codigo en específico de igual forma se recibía ayuda mutuamente corrigiendo errores, por lo tanto las contribuciones no muestra realmente si alguien realizó muchas o pocas cosas en el código, ya que se realizaron muchos otros códigos y funciones de prueba que por motivos de presentación para la entrega hemos tenido que eliminarlas. 
