@@ -156,8 +156,6 @@ void LimpiarInventario(HashMap* inventario) {
         free(par->value);   // Liberar el item apuntado
         par = nextMap(inventario);
     }
-    // No tienes función clearMap, así que borras todos keys:
-    // La forma es iterar mientras haya elementos y borrar uno por uno:
 
     par = firstMap(inventario);
     while (par != NULL) {
@@ -444,7 +442,7 @@ void ActualizarGameplay()
     int tileActual = mapa[tileY][tileX];
 
     if(tileActual == 6 || tileActual == 7 || tileActual == 8) {
-        jugador.vida -= 1; // o cualquier daño que se estime
+        jugador.vida -= 1;
     }
 
     if (tileActual == 4) { // Botiquin
@@ -474,7 +472,7 @@ void ActualizarGameplay()
     }
 
     if (IsKeyPressed(KEY_I))   
-    {  // Por ejemplo, tecla I abre el inventario
+    {
         pantallaDeJuego = INVENTARIO;
         inventarioSeleccionado = 0;  // Reiniciar selección
     }
@@ -714,8 +712,8 @@ int main() {
     // Cargar imagen de menú
     Image image = LoadImage("Menus/Menu_incial.png");
     Texture2D Menu_inicial_imagen = LoadTextureFromImage(image);
-    Texture2D fondoNombre = LoadTexture("Menus/fondo_nombre.jpg");////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    Texture2D fondoGameOver = LoadTexture("Menus/fondo_Game_over.jpg");//////////////////////////////////////////////////////////////////////////////
+    Texture2D fondoNombre = LoadTexture("Menus/fondo_nombre.jpg");
+    Texture2D fondoGameOver = LoadTexture("Menus/fondo_Game_over.jpg");
 
     UnloadImage(image);
 
@@ -761,7 +759,7 @@ int main() {
         // Actualizar offset de la cámara
         camara.offset = (Vector2){ pantalla_ancho / 2.0f, pantalla_alto / 2.0f };
 
-        // En esta parte del código actualiza menu, ponerNombre, gamePlay, gameOver e inventario.
+        // Actualizar menu, ponerNombre, gamePlay, gameOver e inventario.
         switch (pantallaDeJuego) {
             case MENU:
                 ActualizarMenu();
