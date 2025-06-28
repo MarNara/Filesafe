@@ -748,7 +748,7 @@ int main() {
         // Actualizar offset de la cámara
         camara.offset = (Vector2){ pantalla_ancho / 2.0f, pantalla_alto / 2.0f };
 
-        // Actualización
+        // En esta parte del código actualiza menu, ponerNombre, gamePlay, gameOver e inventario.
         switch (pantallaDeJuego) {
             case MENU:
                 ActualizarMenu();
