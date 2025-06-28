@@ -216,7 +216,7 @@ void CargarMapa(const char* nombreArchivo, int*** mapaPtr, int* ancho, int* alto
             {
                 (*jugador).posicion = (Vector2){ (float) x * TILE_SIZE, (float) y * TILE_SIZE };
                 (*jugador).spawn = (*jugador).posicion; // Guardar posición inicial (spawn)
-                (*mapaPtr)[y][x] = 0; // Set spawn point to empty tile
+                (*mapaPtr)[y][x] = 0; 
             }
             Pair* frutasMapa = searchMap(frutasRecolectadas, (char*)nombreArchivo);
             if (frutasMapa) {
@@ -374,7 +374,6 @@ void ActualizarGameplay()
     {
         pantallaDeJuego = COMBATE;
         
-        // CORRECCIÓN: Usar el jugador real en lugar de crear uno nuevo
         Combatiente jugadorX;
         strcpy(jugadorX.nombre, jugador.nombre);
         jugadorX.vida = jugador.vida;
@@ -444,7 +443,7 @@ void ActualizarGameplay()
     int tileActual = mapa[tileY][tileX];
 
     if(tileActual == 6 || tileActual == 7 || tileActual == 8) {
-        jugador.vida -= 1; // o cualquier daño que estimes
+        jugador.vida -= 1; // o cualquier daño que se estime
     }
 
     if (tileActual == 4) { // Botiquin
