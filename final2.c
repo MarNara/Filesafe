@@ -440,6 +440,7 @@ void ActualizarGameplay()
             jugador.posicion.x = (mapaActual->ancho - 2) * TILE_SIZE;
         }
     }
+    
     int tileActual = mapa[tileY][tileX];
 
     if(tileActual == 6 || tileActual == 7 || tileActual == 8) {
@@ -733,15 +734,13 @@ int main() {
     todosLosMapas[0] = CrearMapa(1, "mapas/mapa1.csv");
     todosLosMapas[1] = CrearMapa(2, "mapas/mapa2.csv");
     todosLosMapas[2] = CrearMapa(3, "mapas/mapa3.csv");
-    
     mapaInicial = todosLosMapas[0];
     
     // Conectar mapas
     ConectarMapas(todosLosMapas[0], todosLosMapas[1], 2);
     ConectarMapas(todosLosMapas[1], todosLosMapas[0], 3);
     ConectarMapas(todosLosMapas[1], todosLosMapas[2], 2);
-    ConectarMapas(todosLosMapas[2], todosLosMapas[1], 3);
-    
+    ConectarMapas(todosLosMapas[2], todosLosMapas[1], 3); 
     mapaActual = mapaInicial;
 
     
