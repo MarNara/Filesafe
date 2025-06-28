@@ -9,6 +9,7 @@ Descripción: El juego Filesafe se desarrolla en un mundo distópico en el que u
 **En caso de no tener la biblioteca Raylib aqui mostramos los pasos de como instalarla:**
 1.  Debes instalar MSYS2 MinGw W64. Puede hacerlo ingresando a la siguiente página: https://www.msys2.org/
 Descarga e instala MSYS2 para Windows.
+Presionar next de manera continua hasta que comience a cargar después de instalar msys2
 
 2.  Ahora debes ingresar a la terminal de MSYS2 MinGw W64 y escribir el siguiente comando:
 ```bash
@@ -33,7 +34,11 @@ gcc --version
 ```bash
 pkg-config --libs raylib
 ```
+Poner en el buscar del ordenador "Editar las variables de entorno del sistema", ir al botón de "Variables de entorno" e ingresar a Path y presionar el botón nuevo y luego el de examinar ingresar a la carpeta que está msys64 y luego ingresar a mingw64 y seleccionar la carpeta bin, asi debería verse: 
+![Inicio del juego](Ejemplos_Uso/bin_sacadoDeExaminar.png)
 
+ y luego subir la carpeta bin al inicio de archivos que hay, asi debería verse despues de subir:
+![Inicio del juego](Ejemplos_Uso/subir_Bin.png)
 
 Ahora debes Ingresar al visual studio code. -Clonar en repositorio GitHub el link enviado al aula virtual:
 
