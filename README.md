@@ -34,7 +34,7 @@ gcc --version
 ```bash
 pkg-config --libs raylib
 ```
-Poner en el buscar del ordenador "Editar las variables de entorno del sistema", ir al botón de "Variables de entorno" e ingresar a Path y presionar el botón nuevo y luego el de examinar ingresar a la carpeta que está msys64 y luego ingresar a mingw64 y seleccionar la carpeta bin, asi debería verse: 
+Poner en el buscar del ordenador "Editar las variables de entorno del sistema", ir al botón de "Variables de entorno" e ingresar a Path y presionar el botón "nuevo" y luego el de "examinar" ingresar a la carpeta en que está msys64 y luego ingresar a mingw64 y seleccionar la carpeta bin, asi debería verse luego de seguir esos pasos: 
 ![Inicio del juego](Ejemplos_Uso/bin_sacadoDeExaminar.png)
 
  y luego subir la carpeta bin al inicio de archivos que hay, asi debería verse despues de subir:
