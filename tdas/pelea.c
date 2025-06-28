@@ -7,6 +7,7 @@
 
 #define SCREEN_WIDTH 800
 #define SCREEN_HEIGHT 600
+static double ultimaAccion = 0;
 
 typedef enum {
     OPCION_LUCHAR = 0,
@@ -16,28 +17,20 @@ typedef enum {
 } OpcionMenu;
 
 typedef struct {
-    char nombre[32];
+    char nombre[20];
+    int cantidad;
     int cura;
-} Objeto;
+} Item;
 
-/*
-typedef struct {
-    char nombre[32];
-    int vida;
-    bool esJugador;
-} Combatiente;
-*/
-
-
-Objeto *crearObjeto(const char *nombre, int cura) {
-    Objeto *obj = malloc(sizeof(Objeto));
-    if (obj == NULL) {
-        perror("Fallo al asignar memoria para Objeto");
+Item *crearObjeto(const char *nombre, int cura) {
+    Item *item = malloc(sizeof(Item));
+    if (item == NULL) {
+        perror("Fallo al asignar memoria para Item");
         exit(EXIT_FAILURE);
     }
-    strcpy(obj->nombre, nombre);
-    obj->cura = cura;
-    return obj;
+    strcpy(item->nombre, nombre);
+    item->cura = cura;
+    return item;
 }
 
 void jugadorAtaca(Combatiente *jugador, Combatiente *enemigo) {
@@ -50,32 +43,95 @@ void enemigoAtaca(Combatiente *enemigo, Combatiente *jugador) {
     if (jugador->vida < 0) jugador->vida = 0;
 }
 
-bool iniciar_pelea(Combatiente *jugador, Combatiente *enemigo) {
-    InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "Combate");
+void mostrarInventario(HashMap* inventario, Combatiente* jugador, bool* mostrando, bool* turnoJugador) {
+    static int seleccion = 0;
+    static bool enterBloqueado = false;
+    int totalItems = 0;
 
+    Rectangle rectInventario = {200, 150, 400, 300};
+    Rectangle botonCerrar = {rectInventario.x + rectInventario.width - 30, rectInventario.y + 10, 20, 20};
+
+    DrawRectangleRec(rectInventario, LIGHTGRAY);
+    DrawRectangleLinesEx(rectInventario, 2, GRAY);
+    DrawText("Inventario", 320, 170, 25, BLACK);
+
+    if (firstMap(inventario) == NULL) {
+        DrawText("No tienes objetos.", rectInventario.x + 120, 250, 20, DARKGRAY);
+    }
+
+    DrawRectangleRec(botonCerrar, RED);
+    DrawText("X", botonCerrar.x + 5, botonCerrar.y + 2, 18, WHITE);
+
+    // Contar ítems
+    for (Pair* p = firstMap(inventario); p != NULL; p = nextMap(inventario)) {
+        totalItems++;
+    }
+
+    if (seleccion >= totalItems) seleccion = 0;
+
+    if (IsKeyPressed(KEY_DOWN)) seleccion = (seleccion + 1) % totalItems;
+    if (IsKeyPressed(KEY_UP)) seleccion = (seleccion - 1 + totalItems) % totalItems;
+
+    if (IsKeyPressed(KEY_DELETE)) {
+        *mostrando = false;
+        enterBloqueado = false;
+        return;
+    }
+
+    int y = 220;
+    int i = 0;
+    Pair* par = firstMap(inventario);
+    while (par != NULL) {
+        Item* item = (Item*)par->value;
+        char nombreConCantidad[64];
+        snprintf(nombreConCantidad, sizeof(nombreConCantidad), "%s x%d", par->key, item->cantidad);
+
+        Rectangle slot = {rectInventario.x + 20, y, 200, 30};
+        DrawRectangleRec(slot, i == seleccion ? GRAY : LIGHTGRAY);
+        DrawRectangleLinesEx(slot, 1, DARKGRAY);
+        DrawText(nombreConCantidad, slot.x + 5, slot.y + 5, 18, BLACK);
+
+        if (i == seleccion) {
+            if (IsKeyDown(KEY_ENTER)) {
+                if (!enterBloqueado) {
+                    jugador->vida += item->cura;
+                    if (jugador->vida > 100) jugador->vida = 100;
+
+                    item->cantidad--;
+                    if (item->cantidad <= 0) {
+                        free(item);
+                        eraseMap(inventario, par->key);
+                    }
+
+                    *mostrando = false;
+                    *turnoJugador = false;
+                    seleccion = 0;
+                    enterBloqueado = true;
+                    return;
+                }
+            } else {
+                enterBloqueado = false;
+            }
+        }
+
+        y += 40;
+        par = nextMap(inventario);
+        i++;
+    }
+}
+
+
+bool iniciar_pelea(Combatiente *jugador, Combatiente *enemigo, HashMap* inventario) {
+    InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "Combate");
+    MaximizeWindow();
     Texture2D texFondo = LoadTexture("sprites/personaje/escenario_de_combate.png");
     Texture2D texPersonaje = LoadTexture("sprites/personaje/combate de lado.png");
     Texture2D texEnemigo = LoadTexture("sprites/enemigo_pelea.png");
-
-    HashMap *inventario = createMap(10);
-    if (inventario == NULL) {
-        perror("Fallo al crear el HashMap");
-        CloseWindow();
-        return EXIT_FAILURE;
-    }
 
     SetTargetFPS(60);
 
     Camera2D cam = {0};
     cam.zoom = 1.0f;
-
-    Rectangle rectInventario = {200, 150, 400, 300};
-    Rectangle botonCerrar = {rectInventario.x + rectInventario.width - 30, rectInventario.y + 10, 20, 20};
-
-    insertMap(inventario, "Botiquin", crearObjeto("Botiquin", 10));
-
-    Combatiente player = {"Player", 50, true};
-    Combatiente enemy = {"Robot", 50, false};
 
     bool batallaActiva = true;
     bool mostrandoInventario = false;
@@ -83,7 +139,6 @@ bool iniciar_pelea(Combatiente *jugador, Combatiente *enemigo) {
     OpcionMenu seleccion = OPCION_LUCHAR;
 
     bool turnoJugador = true;
-
     bool animandoAtaque = false;
     bool animandoJugador = false;
     int animFrame = 0;
@@ -95,7 +150,7 @@ bool iniciar_pelea(Combatiente *jugador, Combatiente *enemigo) {
     const float ANCHO_ENEMIGO = 150.0f;
     const float ALTO_ENEMIGO = 150.0f;
 
-    while (!WindowShouldClose() && !IsKeyPressed(KEY_Q)) {
+    while (!WindowShouldClose() && !IsKeyPressed(KEY_ESCAPE)) {
         int width = GetScreenWidth();
         int height = GetScreenHeight();
         float scaleX = (float)width / SCREEN_WIDTH;
@@ -119,9 +174,9 @@ bool iniciar_pelea(Combatiente *jugador, Combatiente *enemigo) {
                     animOffsetEnemyX = -(duracionTotal - animFrame) * avance;
             } else {
                 if (animandoJugador)
-                    jugadorAtaca(&player, &enemy);
+                    jugadorAtaca(jugador, enemigo);
                 else
-                    enemigoAtaca(&enemy, &player);
+                    enemigoAtaca(enemigo, jugador);
 
                 animandoAtaque = false;
                 animOffsetPlayerX = 0;
@@ -146,7 +201,7 @@ bool iniciar_pelea(Combatiente *jugador, Combatiente *enemigo) {
                             mostrandoInventario = true;
                             break;
                         case OPCION_LIBERAR:
-                            if (enemy.vida <= 10) {
+                            if (enemigo->vida <= 10) {
                                 enemigoLiberado = true;
                                 batallaActiva = false;
                             }
@@ -167,39 +222,7 @@ bool iniciar_pelea(Combatiente *jugador, Combatiente *enemigo) {
             }
         }
 
-        if (mostrandoInventario) {
-            Vector2 mouse = GetMousePosition();
-            if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON) && CheckCollisionPointRec(mouse, botonCerrar)) {
-                mostrandoInventario = false;
-                if (batallaActiva && turnoJugador == false) {
-                    turnoJugador = true;
-                }
-            }
-
-            int y = 220;
-            Pair *par = firstMap(inventario);
-            while (par != NULL) {
-                Rectangle slot = {rectInventario.x + 20, y, 200, 30};
-                DrawRectangleRec(slot, LIGHTGRAY);
-                DrawRectangleLinesEx(slot, 1, GRAY);
-                DrawText(par->key, slot.x + 5, slot.y + 5, 18, BLACK);
-
-                if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON) && CheckCollisionPointRec(mouse, slot)) {
-                    Objeto *obj = (Objeto *)par->value;
-                    player.vida += obj->cura;
-                    if (player.vida > 50) player.vida = 50;
-                    free(obj);
-                    eraseMap(inventario, par->key);
-                    mostrandoInventario = false;
-                    turnoJugador = false;
-                    break;
-                }
-                y += 40;
-                par = nextMap(inventario);
-            }
-        }
-
-        if (player.vida <= 0 || enemy.vida <= 0 || enemigoLiberado) {
+        if (jugador->vida <= 0 || enemigo->vida <= 0 || enemigoLiberado) {
             batallaActiva = false;
         }
 
@@ -218,22 +241,11 @@ bool iniciar_pelea(Combatiente *jugador, Combatiente *enemigo) {
         Rectangle rectJugador = {100 + animOffsetPlayerX, 220, ANCHO_JUGADOR, ALTO_JUGADOR};
         Rectangle rectEnemigo = {600 + animOffsetEnemyX, 220, ANCHO_ENEMIGO, ALTO_ENEMIGO};
 
-        DrawTexturePro(texPersonaje,
-                       (Rectangle){0, 0, texPersonaje.width, texPersonaje.height},
-                       rectJugador,
-                       (Vector2){0, 0},
-                       0.0f,
-                       WHITE);
+        DrawTexturePro(texPersonaje, (Rectangle){0, 0, texPersonaje.width, texPersonaje.height}, rectJugador, (Vector2){0, 0}, 0.0f, WHITE);
+        DrawTexturePro(texEnemigo, (Rectangle){0, 0, texEnemigo.width, texEnemigo.height}, rectEnemigo, (Vector2){0, 0}, 0.0f, WHITE);
 
-        DrawTexturePro(texEnemigo,
-                       (Rectangle){0, 0, texEnemigo.width, texEnemigo.height},
-                       rectEnemigo,
-                       (Vector2){0, 0},
-                       0.0f,
-                       WHITE);
-
-        DrawText(TextFormat("Player - Vida: %d", player.vida), 100, 100, 20, BLUE);
-        DrawText(TextFormat("Robot - Vida: %d", enemy.vida), 500, 100, 20, RED);
+        DrawText(TextFormat("%s - Vida: %d", jugador->nombre, jugador->vida), 100, 100, 20, BLUE);
+        DrawText(TextFormat("%s - Vida: %d", enemigo->nombre, enemigo->vida), 500, 100, 20, RED);
 
         if (!mostrandoInventario && batallaActiva && !animandoAtaque) {
             DrawRectangle(80, 380, 250, 170, LIGHTGRAY);
@@ -245,27 +257,18 @@ bool iniciar_pelea(Combatiente *jugador, Combatiente *enemigo) {
         }
 
         if (mostrandoInventario) {
-            DrawRectangleRec(rectInventario, LIGHTGRAY);
-            DrawRectangleLinesEx(rectInventario, 2, GRAY);
-            DrawText("Inventario", 320, 170, 25, BLACK);
-
-            if (firstMap(inventario) == NULL) {
-                DrawText("No tienes objetos.", rectInventario.x + 120, 250, 20, DARKGRAY);
-            }
-
-            DrawRectangleRec(botonCerrar, RED);
-            DrawText("X", botonCerrar.x + 5, botonCerrar.y + 2, 18, WHITE);
+            mostrarInventario(inventario, jugador, &mostrandoInventario, &turnoJugador);
         }
 
         if (!batallaActiva) {
-            if (player.vida <= 0)
+            if (jugador->vida <= 0)
                 DrawText("Has perdido!", 300, 300, 30, RED);
-            else if (enemy.vida <= 0)
+            else if (enemigo->vida <= 0)
                 DrawText("Has ganado!", 300, 300, 30, GREEN);
             else if (enemigoLiberado)
                 DrawText("¡Has liberado a esta persona!", 225, 300, 25, WHITE);
 
-            DrawText("Presiona Q para salir...", 250, 400, 20, DARKGRAY);
+            DrawText("Presiona ESC para salir...", 250, 400, 20, DARKGRAY);
         }
 
         EndMode2D();
@@ -276,5 +279,8 @@ bool iniciar_pelea(Combatiente *jugador, Combatiente *enemigo) {
     UnloadTexture(texPersonaje);
     UnloadTexture(texEnemigo);
     CloseWindow();
-    return 0;
+
+    if (enemigo->vida <= 0) return true;
+    if (jugador->vida <= 0) return false;
+    return false;
 }

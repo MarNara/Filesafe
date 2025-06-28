@@ -19,7 +19,7 @@
 #define MENSAJE_DURACION 2.5f
 
 typedef struct {
-    char nombre[20];  // "Pocion", "Fruta", etc.
+    char nombre[20];  // "Pocion", "Botiquin", etc.
     int cantidad;     // cuántos tienes
     int curacion;     // cuánto cura ese item
 } Item;
@@ -34,6 +34,7 @@ typedef enum GameScreen
     COMBATE,
     INVENTARIO,
 } GameScreen;
+
 
 // --- VARIABLES GLOBALES ---
 Sprite* spriteJugador = NULL;
@@ -223,7 +224,7 @@ void CargarMapa(const char* nombreArchivo, int*** mapaPtr, int* ancho, int* alto
                 Node* current = posiciones->head;
                 while (current) {
                     Vector2* pos = (Vector2*)current->data;
-                    (*mapaPtr)[(int)pos->y][(int)pos->x] = 0;  // Eliminar fruta
+                    (*mapaPtr)[(int)pos->y][(int)pos->x] = 0;  // Eliminar Botiquin
                     current = current->next;
                 }
             }
@@ -351,20 +352,16 @@ void ActualizarGameplay()
 {
     int tileX = (int)(jugador.posicion.x / TILE_SIZE);
     int tileY = (int)(jugador.posicion.y / TILE_SIZE);
-
     bool enemigoCercano = false;
 
-    Combatiente jugadorX = {"Player", 50, true};
-    Combatiente enemigoY = {"Robot", 50, false};
-    ///-------------------------------------------------------------------enemigo--------------------------------------------------------------------------------------
-    // Revisa un área 3x3 alrededor del jugador para detectar enemigos 
+    // Detección de enemigos
     for (int dy = -1; dy <= 1; dy++) {
         for (int dx = -1; dx <= 1; dx++) {
             int x = tileX + dx;
             int y = tileY + dy;
             if (x >= 0 && x < mapaActual->ancho && y >= 0 && y < mapaActual->alto) {
                 int tile = mapa[y][x];
-                if (tile == 6) {// encuentro con enemigo
+                if (tile == 6) {
                     enemigoCercano = true;
                     break;
                 }
@@ -373,10 +370,28 @@ void ActualizarGameplay()
         if (enemigoCercano) break;
     }
 
-    if (enemigoCercano) {
-        pantallaDeJuego = COMBATE;    // Cambia la pantalla a combate
-        iniciar_pelea(&jugadorX, &enemigoY);              // Llama a la función de pelea que creaste
-        return;                      // Salimos de la función para evitar seguir actualizando el gameplay
+    if (enemigoCercano) 
+    {
+        pantallaDeJuego = COMBATE;
+        
+        // CORRECCIÓN: Usar el jugador real en lugar de crear uno nuevo
+        Combatiente jugadorX;
+        strcpy(jugadorX.nombre, jugador.nombre);
+        jugadorX.vida = jugador.vida;
+        jugadorX.esJugador = true;
+
+        Combatiente enemigoY = {"Robot", 50, false};
+        
+        // Pasar el inventario real del jugador
+        bool resultado = iniciar_pelea(&jugadorX, &enemigoY, jugador.inventario);
+        
+        // Actualizar la vida del jugador después del combate
+        jugador.vida = jugadorX.vida;
+        
+        if (jugador.vida <= 0) {
+            pantallaDeJuego = GAME_OVER;
+        }
+        return;
     }
 
     float delta = GetFrameTime();
@@ -432,7 +447,7 @@ void ActualizarGameplay()
         jugador.vida -= 1; // o cualquier daño que estimes
     }
 
-    if (tileActual == 4) { // Fruta
+    if (tileActual == 4) { // Botiquin
         // Registrar posición recolectada
         Vector2* posFruta = malloc(sizeof(Vector2));
         posFruta->x = tileX;
@@ -448,14 +463,14 @@ void ActualizarGameplay()
             list_pushBack(lista, posFruta);
         }
         
-        // Recolectar fruta
-        AgregarItem(jugador.inventario, "Fruta", 10);
+        // Recolectar Botiquin
+        AgregarItem(jugador.inventario, "Botiquin", 10);
         mapa[tileY][tileX] = 0;
     }
 
     if (IsKeyPressed(KEY_F)) 
     { // Pulsar F para curarse
-        UsarItem(jugador.inventario, "Fruta", &jugador);
+        UsarItem(jugador.inventario, "Botiquin", &jugador);
     }
 
     if (IsKeyPressed(KEY_I))   
@@ -621,7 +636,7 @@ void DrawGameplay(float scaleX, float scaleY) {
             Color color = BLANK;
 
             if (tile == 1 || tile == -1 || tile == -2) color = GRAY;     // plataformas y paredes
-            else if (tile == 4) color = GREEN;                           // fruta
+            else if (tile == 4) color = GREEN;                           // Botiquin
             else if (tile == 6 || tile == 7 || tile == 8) color = RED;   // peligros
 
             if (color.a != 0) {
@@ -691,7 +706,7 @@ void sprites_mundo()
 int main() {
     SetConfigFlags(FLAG_WINDOW_RESIZABLE);
     InitWindow(BASE_ANCHO, BASE_ALTO, "FILESAFE");
-    //MaximizeWindow();
+    MaximizeWindow();
     SetTargetFPS(60);
 
     sprites_mundo();
