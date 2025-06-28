@@ -53,22 +53,7 @@ Abre la terminal con ctrl + ñ.
 ```bash
 ./juego
 ```
-## Para agregar el avance de solo un archivo: 
-- En la terminal bash ingresa los siguientes comandos:
-```bash
-git add README.md
-```
-```bash
-git commit -m "avance"
-```
-```bash
-git push origin main
-```
-## comando que actualiza todos los cambios guardados de otros:
 
-```bash
-git pull origin main
-```
 ## Opciones que funcionan correctamente y las que no lo hacen:
 La opción menú de inicio (o principal) funciona correctamente, ya que permite ejecutar salida, mover arriba y abajo e iniciar el juego. Por otra parte, en el menú de pelea, luchar funciona bien, y librar funciona correctamente al cumplir la condición para poder librar al enemigo, el inventario se abre, sin embargo, no se muestran las frutas guardadas. Además la pantalla de Game Over funciona correctamente.
 
