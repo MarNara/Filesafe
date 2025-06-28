@@ -68,6 +68,7 @@ La opción menú de inicio (o principal) funciona correctamente, ya que permite 
 - Al mover la ventana el personaje sufre de bugs.
 - Hay animaciones que quedaron pegadas al escenario, como por ejemplo un guardia pegado a la mitad de la pared.
 - No se aceptan numeros ni letras con tilde en el nombre del personaje. 
+- Cuando se recojen botiquines y se usan todos durante el juego (es decir el recorrido) y si vuelven a recojer botiquines, el hashmap se bugea y se cierra el juego.
 - Al cerrar la ventana de lucha se cierra el juego completamente, puesto que esto ocurrió debido a falta de tiempo.
 
 ## Ejemplos que muestran cómo interactuar con la aplicación.
