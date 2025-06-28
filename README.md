@@ -69,6 +69,13 @@ git push origin main
 ```bash
 git pull origin main
 ```
+## Opciones que funcionan correctamente y las que no lo hacen:
+La opción menú de inicio (o principal) funciona correctamente, ya que permite ejecutar salida, mover arriba y abajo e iniciar el juego. Por otra parte, en el menú de pelea, luchar funciona bien, y librar funciona correctamente al cumplir la condición para poder librar al enemigo, el inventario se abre, sin embargo, no se muestran las frutas guardadas. Además la pantalla de Game Over funciona correctamente.
+
+---Observación---
+Creemos que una posible causa de que el inventario no se pueda conectar correctamente sea debido a una mala comunicación de los archivos. 
+
+Las frutas fueron implementadas como cuadros debido a que ocurrian problemas al tener dos sprites juntos, es decir, los bloque de la pared y la fruta delante del bloque, esto generaba que ambas se unieran.
 
 ## Ejemplos que muestran cómo interactuar con la aplicación.
 
@@ -87,3 +94,23 @@ Ingreso al juego:
 
 ![Inicio del juego](Ejemplos_Uso/ejemplo_gameOver.png)
 Al presionar enter este vuelve a la pantalla de inicio.
+
+
+
+
+## Contribuciones de cada integrante y roles
+Juan Gatica:
+Descubrió y facilitó el uso de la biblioteca Raylib, permitiendo el desarrollo gráfico del juego en lenguaje C. Creó la función de carga de archivos de manera exitosa y desarrolló la lógica base de movimiento del personaje, incluyendo una mecánica de salto funcional y estable. Además, se encargó de revisar la implementación de la lógica de ataque y del juego en general. Además se encargó de que los elementos del juego se adapten a su escenario correspondiente.
+
+Anyara Guajardo:
+Organizó los TDAs en una carpeta dedicada, aportando a la claridad del proyecto, además de completar el diseño de los mapas. Desarrolló un prototipo de la parte gráfica inicial del juego y fue responsable de buscar y adaptar los sprites utilizados. Contribuyó con ideas para la implementación del inventario, y realizó pruebas exhaustivas del sistema de combate para detectar fallas. También revisó posibles problemas del menú de juego y lo completo, además validó el sistema de carga de archivos.
+
+
+Martina Ahumada:
+Creó el repositorio del proyecto e integró todos los TDAs. Fue la encargada de diseñar y estructurar los mapas del juego. Completó la logica de colisiones en el menú de combate, con un mínimo de errores. Se encargó de revisar el funcionamiento del HashMap, gestionar el manejo de memoria, realizar pruebas funcionales completas del juego e integrar el menú de combate al juego principal y mejorar tanto los aspectos visuales como las instrucciones del archivo README.
+
+Hans Gonzalez:
+Colaboró en la creación de los menús del juego y diseñó la estructura del personaje, incluyendo atributos como el nombre y la vida. Participó en el diseño del menú de combate, revisando elementos como el inventario, la vida del jugador y del enemigo, la opción de hackear NPCs para liberarlos del control de la IA, la opción inventario y también la opción de lucha. Además, se encargó de crear los NPCs e implementó el escenario de combate.
+
+**Observación**
+Si bien cada uno se encargaba de una parte del funcionamiento del codigo en específico de igual forma se recibía ayuda mutuamente corrigiendo errores, por lo tanto las contribuciones no muestra realmente si alguien realizó muchas o pocas cosas en el código, ya que se realizaron muchos otros códigos y funciones de prueba que por motivos de presentación para la entrega hemos tenido que eliminarlas.
